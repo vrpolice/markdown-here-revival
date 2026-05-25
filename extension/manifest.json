@@ -1,0 +1,135 @@
+{
+  "manifest_version": 2,
+  "name": "__MSG_app_name__",
+  "version": "4.0.13",
+  "description": "__MSG_app_slogan__",
+  "homepage_url": "https://gitlab.com/jfx2006/markdown-here-revival",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "markdown-here-revival@xul.calypsoblue.org",
+      "strict_min_version": "128.0",
+      "strict_max_version": "151.*"
+    }
+  },
+  "default_locale": "en",
+  "icons": {
+    "16": "images/md_fucsia.svg",
+    "32": "images/md_fucsia.svg",
+    "48": "images/md_fucsia.svg",
+    "128": "images/md_fucsia.svg",
+    "512": "images/md_fucsia.svg"
+  },
+  "permissions": [
+    "accountsRead",
+    "compose",
+    "compose.save",
+    "menus",
+    "messagesRead",
+    "storage",
+    "tabs"
+  ],
+  "background": {
+    "page": "background.html"
+  },
+  "compose_action": {
+    "browser_style": true,
+    "default_area": "formattoolbar",
+    "default_icon": {
+      "16": "images/md_fucsia.svg",
+      "19": "images/md_fucsia.svg",
+      "32": "images/md_fucsia.svg",
+      "38": "images/md_fucsia.svg",
+      "64": "images/md_fucsia.svg"
+    },
+    "theme_icons": [
+      {
+        "dark": "images/md_dark.svg",
+        "light": "images/md_light.svg",
+        "size": 16
+      },
+      {
+        "dark": "images/md_dark.svg",
+        "light": "images/md_light.svg",
+        "size": 19
+      },
+      {
+        "dark": "images/md_fucsia.svg",
+        "light": "images/md_fucsia.svg",
+        "size": 32
+      },
+      {
+        "dark": "images/md_fucsia.svg",
+        "light": "images/md_fucsia.svg",
+        "size": 64
+      }
+    ],
+    "default_title": "__MSG_toggle_button_tooltip_enable__"
+  },
+  "commands": {
+    "toggle-markdown": {
+      "suggested_key": {
+        "default": "Ctrl+Alt+M",
+        "mac": "MacCtrl+Ctrl+M"
+      }
+    }
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "experiment_apis": {
+    "notificationbar": {
+      "schema": "experiments/notificationbar/schema.json",
+      "parent": {
+        "scopes": [
+          "addon_parent"
+        ],
+        "paths": [
+          [
+            "notificationbar"
+          ]
+        ],
+        "script": "experiments/notificationbar/implementation.js"
+      }
+    },
+    "reply_prefs": {
+      "schema": "experiments/preferences_schema.json",
+      "parent": {
+        "scopes": [
+          "addon_parent"
+        ],
+        "paths": [
+          [
+            "reply_prefs"
+          ]
+        ],
+        "script": "experiments/preferences.js"
+      }
+    },
+    "ex_customui": {
+      "schema": "experiments/customui/api.json",
+      "parent": {
+        "scopes": [
+          "addon_parent"
+        ],
+        "paths": [
+          [
+            "ex_customui"
+          ]
+        ],
+        "script": "experiments/customui/parent.js"
+      },
+      "child": {
+        "scopes": [
+          "addon_child"
+        ],
+        "paths": [
+          [
+            "ex_customui"
+          ]
+        ],
+        "script": "experiments/customui/child.js"
+      }
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "name": "markdown-here-revival",
+  "version": "4.0.13",
+  "description": "Markdown emails for Mozilla Thunderbird",
+  "scripts": {
+    "build": "web-ext build -n markdown-here-revival.xpi",
+    "lint": "eslint .",
+    "test128": "web-ext run --verbose -p mdhr_test_profiles/testing128 -f /home/rob/bin/thunderbird128 --keep-profile-changes",
+    "testrelease": "web-ext run --verbose -p mdhr_test_profiles/testing-release -f /home/rob/bin/thunderbird-release --keep-profile-changes",
+    "testbeta": "web-ext run --verbose -f thunderbird-beta -p mdhr_test_profiles/testing-beta --keep-profile-changes",
+    "testdaily": "web-ext run --verbose -p mdhr_test_profiles/testing-daily -f /home/rob/bin/thunderbird-daily"
+  },
+  "type": "module",
+  "private": true,
+  "author": "JFX",
+  "license": "MIT",
+  "dependencies": {
+    "@jfx2006/mailext-options-sync": "git+https://gitlab.com/mdhr-extension/mailext-options-sync.git#v4.0.3-jfx",
+    "@textcomplete/contenteditable": "^0.1.13",
+    "@textcomplete/core": "^0.1.13",
+    "@textcomplete/utils": "^0.1.13",
+    "bootstrap": "^5.3.8",
+    "bootswatch": "^5.3.8",
+    "degausser": "^2.4.4",
+    "dompurify": "^3.3.3",
+    "emojibase-data": "^17.0.0",
+    "eventemitter3": "^5.0.4",
+    "highlight.js": "^11.11.1",
+    "marked": "^17.0.6",
+    "marked-emoji": "^2.0.1",
+    "marked-extended-tables": "2.0.1",
+    "marked-highlight": "^2.2.4",
+    "marked-linkify-it": "^3.1.15",
+    "texzilla": "^1.0.2",
+    "turndown": "^7.2.4"
+  },
+  "overrides": {
+    "marked-extended-tables": {
+      "marked": ">=3 <18"
+    }
+  },
+  "devDependencies": {
+    "@eslint/compat": "^2.0.5",
+    "@eslint/css": "^1.1.0",
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^1.2.0",
+    "@eslint/markdown": "^8.0.1",
+    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@types/thunderbird-webext-browser": "^127.0.0",
+    "cpy-cli": "^7.0.0",
+    "esbuild": "^0.27.7",
+    "esbuild-plugin-replace-regex": "^0.0.2",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-html": "^8.1.4",
+    "eslint-plugin-mailextensions-env": "file:tools/eslint-plugin-mailextensions-env",
+    "eslint-plugin-no-unsanitized": "^4.1.5",
+    "eslint-plugin-prettier": "^5.5.5",
+    "globals": "^17.4.0",
+    "prettier": "^3.8.1",
+    "rollup": "^4.17.2",
+    "touch": "^3.1.1",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.58.1",
+    "web-ext": "^10.1.0"
+  }
+}

@@ -1,0 +1,44 @@
+<!--
+  ~ Copyright JFX 2021-2023
+  ~ MIT License
+  ~ https://gitlab.com/jfx2006
+  -->
+
+<!DOCTYPE html>
+
+<!--
+Copyright Adam Pritchard 2013
+MIT License : http://adampritchard.mit-license.org/
+-->
+
+<html lang="en" style="height: 100%">
+
+<head>
+  <meta charset="UTF-8"/>
+
+  <title>Markdown Here Autotests</title>
+  <meta name="description" content=""/>
+  <meta name="author" content=""/>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <link rel="stylesheet" href="mocha.css"/>
+</head>
+
+<body>
+  <div id="mocha"></div>
+
+  <script src="chai.js"></script>
+  <script src="mocha.js"></script>
+  <script src="chai-dom.js"></script>
+
+  <script src="test-prep.js" class="mocha-init"></script>
+  <script src="async_utils-test.js" type="module"></script>
+  <script src="options_migration-test.js" type="module"></script>
+  <script src="mdhr-mangle-test.js" type="module"></script>
+  <script src="markdown-render-test.js" type="module"></script>
+  <script src="test-run.js" class="mocha-exec"></script>
+</body>
+
+
+</html>

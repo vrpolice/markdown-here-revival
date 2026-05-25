@@ -1,0 +1,381 @@
+{
+  "app_name": {
+    "message": "Markdown Here Revival",
+    "description": "This is the name of the extension, the placeholder $APPNAME$ is used the remaining strings.",
+    "hash": "edf09063590176700ead1a22bf3a5937"
+  },
+  "app_slogan": {
+    "message": "Обсуждение Mozilla Thunderbird",
+    "hash": "7aa2f8c03f41e6629904f5833dac94a7"
+  },
+  "__WET_GROUP__application": {
+    "message": "Применение",
+    "hash": "705a7139d345ac5faa9a3cfc7114e189"
+  },
+  "toggle_button_tooltip_enable": {
+    "message": "Скачать Markdown Preview",
+    "description": "text shown when user hovers mouse over Markdown Toggle button",
+    "hash": "d9cb83c089cf43059f988f5bb25d6ad9"
+  },
+  "toggle_button_tooltip_disable": {
+    "message": "Отключить Markdown Preview",
+    "description": "text shown when user hovers mouse over Markdown Toggle button",
+    "hash": "6569e1487fed213bcf1513bb93fb12fc"
+  },
+  "upgrade_notification_text": {
+    "message": "$APPNAME$ обновился",
+    "description": "Text on the notification shown when Markdown Here has been updated",
+    "placeholders": {
+      "appname": {
+        "content": "$1"
+      }
+    },
+    "hash": "76796ecd460f742236be591169ce278b"
+  },
+  "update_notes_button": {
+    "message": "Обновление Notes",
+    "hash": "fef3aae852e44ea637393db11e0da28a"
+  },
+  "cancel_button": {
+    "message": "отменить",
+    "hash": "17aa19f18a894459ab6ff21156e8a341"
+  },
+  "forgot_to_render_back_button": {
+    "message": "Назад",
+    "description": "Text on the Back (cancel) button of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email",
+    "hash": "16a5bc1e5d6a2e5bbb1b35ca483971e8"
+  },
+  "forgot_to_render_prompt_close_hover": {
+    "message": "Закрыть это уведомление",
+    "description": "Text that shows when the user hovers over the 'X' that will close the prompt",
+    "hash": "48f8b404a3afd15f165abe500bf625c0"
+  },
+  "forgot_to_render_prompt_info": {
+    "message": "Похоже, что вы написали это письмо в Markdown, но забыли отрендерить его.",
+    "description": "Informational part of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email",
+    "hash": "7a6bf5503a66dfc42914e6fec5a668ba"
+  },
+  "forgot_to_render_prompt_question": {
+    "message": "Отправить его в любом случае?",
+    "description": "Question part of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email",
+    "hash": "5ceefbf6f6675554ec47ed2fac4edc4d"
+  },
+  "forgot_to_render_send_button": {
+    "message": "Отправить",
+    "description": "Text on the Send (continue) button of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email",
+    "hash": "f654735fe65fdb8b2c7bd00ce5c4096d"
+  },
+  "set_math_api_url": {
+    "message": "Установите API URL для рендеринга математики в настройках.",
+    "description": "A message displayed when math rendering is set to use Gchart but an invalid URL is set.",
+    "hash": "265f98a913e4f279878a79f3dabbb39c"
+  },
+  "reset_preview": {
+    "message": "Скачать Preview",
+    "description": "Context menu item displayed on the compose action that resets the live preview to a usable state.",
+    "hash": "6ca043613138c5e1b2e3b20df003c175"
+  },
+  "edit_as_new_markdown_message": {
+    "message": "Редактировать новое сообщение Markdown",
+    "description": "Context menu item displayed from message list",
+    "hash": "6c44fa4651ec2a7ba8c69cbb5d6f7602"
+  },
+  "__WET_GROUP__settings": {
+    "message": "Настройки расширений Страницы",
+    "hash": "ce17411c17caa2a7736b05051cd1b2e2"
+  },
+  "options_page__page_title": {
+    "message": "Настройки $APPNAME$",
+    "placeholders": {
+      "appname": {
+        "content": "$1"
+      }
+    },
+    "hash": "fefb9554fa7cc03466d11dd0e706bb2e"
+  },
+  "__WET_GROUP__options": {
+    "message": "Варианты",
+    "hash": "531dad0078a72193602b18495f0ad4e9"
+  },
+  "options_page__options_title": {
+    "message": "Настройки",
+    "hash": "531dad0078a72193602b18495f0ad4e9"
+  },
+  "options_page__interface_mode": {
+    "message": "Пользовательский интерфейс",
+    "description": "Label for selecting the user interface mode (eg. modern or classic modes)",
+    "hash": "a827c951ef7fe2da75ebc58baf88287f"
+  },
+  "options_page__mdhr_classic_mode": {
+    "message": "Использовать режим pre-4.0 (классический)",
+    "description": "Label for selecting classic UI",
+    "hash": "ca33d5b7a452b6e1fdd82d32b42b844f"
+  },
+  "options_page__mdhr_modern_mode": {
+    "message": "Live Preview (современный)",
+    "description": "Label for selecting modern UI",
+    "hash": "fd781763933043b55578498058686099"
+  },
+  "options_page__forgot_to_render_label2": {
+    "message": "Включите проверку на забытость",
+    "description": "Label for the checkbox that enables the forgot-to-render feature",
+    "hash": "303a6d031665e54b24debeb7fd5827b7"
+  },
+  "options_page__forgot_to_render_2": {
+    "message": "Когда вы отправляете электронное письмо, оно проверяет содержимое, чтобы увидеть, похоже ли, что вы написали его в Markdown.\nНо вы забыли отредактировать его (например, нажмите «Markdown Toggle») перед отправкой.\nЭто может быть отключено, если это мешает вашей способности отправлять электронную почту.",
+    "description": "Descriptive text explaining the 'forgot-to-render' feature.",
+    "hash": "1c100cda3b6f6da50138458b785b47cb"
+  },
+  "options_page__composer_start_markdown_mode": {
+    "message": "Старт композитора в режиме Markdown",
+    "hash": "97a0a3d24c0345f5347393de128d07d0"
+  },
+  "options_page__features_title": {
+    "message": "Особенности Markdown",
+    "description": "Heading for a set of options to enable or disable various features of the Markdown rendering",
+    "hash": "e04d60a1956f82aa35a56aac12b6aaf3"
+  },
+  "options_page__gfm_line_breaks_enabled_label": {
+    "message": "Перенос строк как в Github (GFM).",
+    "description": "Label for the checkbox that enables the support of 'Github-flavored Markdown' line breaks.",
+    "hash": "5ac5728cb528e8d8edaa61ca7fbd6255"
+  },
+  "options_page__smart_replacements_enabled_label": {
+    "message": "Включить «умные» типографские замены",
+    "description": "Label for enabling the smart replacements feature",
+    "hash": "d53c8006f33df32034b4e13dec238738"
+  },
+  "options_page__smart_replacements_2": {
+    "message": "Умные замены включают в себя: цитаты уникода, en- и em-dash, эллипсы и замены стрелок",
+    "description": "An explanation of what smart replacements are",
+    "hash": "5f91244199941f295456a0c754f51ddf"
+  },
+  "options_page__emoji_shortcode_enabled_label": {
+    "message": "Включить :emoji: (стиль Github) Шорткоды",
+    "description": "Label for enabling emoji shortcodes",
+    "hash": "b20f1c09d205160478c354cfd2aefc59"
+  },
+  "options_page__emoji_autocomplete_enabled_label": {
+    "message": "Включить Emoji Auto Complete Popup",
+    "description": "Label for enabling an auto-complete popup for emoji shortcodes",
+    "hash": "c3f3aa4d8b7861ec6924305a7ae2e055"
+  },
+  "options_page__hotkey_title": {
+    "message": "\"Горячая\"(она же \"быстрая\") комбинация клавиш",
+    "description": "A section title",
+    "hash": "50ef7c2fb35b7df36ea871c4b23d151a"
+  },
+  "options_page__tex_math_title": {
+    "message": "Поддержка математических формул TeX",
+    "hash": "8c09b9f03c93800e4f601e57c374eec5"
+  },
+  "options_page__tex_math_texzilla_label": {
+    "message": "TeXZilla и HTML Canvas рендеринг",
+    "description": "Label for tex math rendering option",
+    "hash": "c210e3a6960c6d788491ac424f16c7a3"
+  },
+  "options_page__tex_math_texzilla_label-Title": {
+    "message": "Математические формулы отображаются с помощью TeXZilla.js с помощью холста браузера. Сетевой запрос не отправляется.",
+    "description": "description how math is rendered when TexZilla option is selected",
+    "hash": "ead94268f19cef4441fc69f97689d9b6"
+  },
+  "options_page__tex_math_codecogs_label": {
+    "message": "Математический рендеринг с использованием CodeCogs Equation Rendering API",
+    "description": "Label for CodeCogs math rendering option",
+    "hash": "cd4b796d4e49c47a088f617a627362d8"
+  },
+  "options_page__tex_math_codecogs_customization_1": {
+    "message": "Чтобы создать изображение для формулы, запрос отправляется в CodeCogs. Это означает, что вы делитесь своей формулой с CodeCogs. Это также означает, что получатели вашего сообщения будут запрашивать у CodeCogs визуализацию изображения.",
+    "description": "one of the CodeCogs TeX math privacy concerns",
+    "hash": "23d26e0ef10e5ea0c7139101b74a41c8"
+  },
+  "options_page__tex_math_codecogs_customization_2": {
+    "message": "Для опций настройки рендеринга см. документацию $LINK$CodeCogs $CLOSELINK$ для этой услуги.",
+    "description": "Link to CodeCogs documentation - do not translate $PLACEHOLDERS$",
+    "placeholders": {
+      "link": {
+        "content": "<a href=\"https://editor.codecogs.com/docs/4-LaTeX_rendering.php\" target=\"_blank\">"
+      },
+      "closelink": {
+        "content": "</a>"
+      }
+    },
+    "hash": "d108daece31e555fb937bda04f5d6c32"
+  },
+  "options_page__tex_math_codecogs_customization_3": {
+    "message": "Хорошим ресурсом для создания формул TeX является редактор уравнений $LINK$CodeCogs Близнецы.",
+    "description": "More info about CodeCogs - do not translate $PLACEHOLDERS$",
+    "placeholders": {
+      "link": {
+        "content": "<a href=\"https://editor.codecogs.com/\" target=\"_blank\">"
+      },
+      "closelink": {
+        "content": "</a>"
+      }
+    },
+    "hash": "2e8aa3d8baaa90e12a7b9c89f9859ba0"
+  },
+  "options_page__buglink_description": {
+    "message": "Создавайте ссылки на трекеры ошибок или проблем, такие как #12345. Поля ниже используются для шаблонизации URL и текста ссылок.",
+    "description": "Description of bug/issue link feature.",
+    "hash": "7569aed609aa4c28943b4f66218c3f16"
+  },
+  "options_page__buglink_enabled_label": {
+    "message": "Включить ссылки Bug/Issue",
+    "description": "Enable Bug or Issue linking",
+    "hash": "ff6080e1ffeb0eefb573565c4cdd4134"
+  },
+  "options_page__buglink_url": {
+    "message": "URL ссылки",
+    "description": "Template field for creating bug/issue links",
+    "hash": "1df9e2c05db77316a3a97275017967b7"
+  },
+  "options_page__buglink_text": {
+    "message": "Ссылочный текст",
+    "description": "Template for bug/issue link text",
+    "hash": "6d3723ccc9b4bf5a55cb0ca849b9438e"
+  },
+  "__WET_GROUP__usage": {
+    "message": "Как",
+    "hash": "71ec48cc2984647ec331a3bcee3a9610"
+  },
+  "options_page__howto": {
+    "message": "Как",
+    "hash": "71ec48cc2984647ec331a3bcee3a9610"
+  },
+  "options_page__basic_usage": {
+    "message": "Базовое использование",
+    "hash": "1725d6ca5bc388ea2f5286d5f59eca84"
+  },
+  "options_page__start_new_message_toggle": {
+    "message": "Начните новое сообщение электронной почты. Переключите композитора на режим разметки с помощью кнопки действия на панели инструментов формата.",
+    "hash": "a3cf8f8bcf6c08e2ba178c9a999bda2a"
+  },
+  "options_page__type_some_markdown": {
+    "message": "Напечатайте что-нибудь в Markdown в вашем сообщении. Попробуйте это:",
+    "hash": "f0db9e92b6eead27204d516a3034a2fc"
+  },
+  "options_page__short_markdown_example": {
+    "message": "_Привет_ `Markdown` **Here** _Revival_!",
+    "hash": "67f19cc4f24de8f9b404819ab7633356"
+  },
+  "options_page__compose_live_preview": {
+    "message": "Обновления предварительного просмотра в реальном времени, когда вы пишете свое сообщение.",
+    "hash": "549af642c5b973f9b4c4c304eb004475"
+  },
+  "options_page__compose_send_message": {
+    "message": "Отправь сообщение!",
+    "hash": "4ab42a8334e6c82218c00d007d10fae5"
+  },
+  "options_page__toggle_hotkey": {
+    "message": "Используйте горячий ключ:",
+    "description": "A step suggestion in the basic usage instructions",
+    "hash": "64f745514a24fa38ae148ef25745c835"
+  },
+  "options_page__resources_title": {
+    "message": "Ресурсы и ссылки",
+    "description": "A section title",
+    "hash": "d3acbfafa858245f2345f00786324790"
+  },
+  "options_page__resources_cheatsheet_link": {
+    "message": "Если вы новичок в Markdown, то эта <a href=\"https://github.com/adam-p/markdown-here/wiki/Markdown-Here-Cheatsheet\" target=\"_blank\"> Markdown Here шпаргалка</a> сделает вас настоящим про.",
+    "hash": "ddb4af27f215d4704f3f31878374c20f"
+  },
+  "options_page__mdhr_wiki": {
+    "message": "Markdown Here Возрождение Вики",
+    "hash": "31514a95d56ddc2d8df5c4d15439d17f"
+  },
+  "options_page__tips_tricks_link": {
+    "message": "Советы и хитрости",
+    "hash": "c17546aca51dff7b1014d20502cb526"
+  },
+  "__WET_GROUP__theme": {
+    "message": "Тема",
+    "hash": "9da24ca7508eb181c632829fd698be9a"
+  },
+  "options_page__primary_css_title": {
+    "message": "Основной стиль CSS",
+    "description": "section title",
+    "hash": "1381af5b005843fe11ee6884b0093683"
+  },
+  "options_page__syntax_highlighting_css_title": {
+    "message": "Подсветка синтаксиса CSS",
+    "description": "section title",
+    "hash": "697181e7fed87c2b2c17dab7b3e1cf25"
+  },
+  "options_page__syntax_highlighting_theme_label": {
+    "message": "Тема",
+    "description": "label for the syntax highlighting theme combo box",
+    "hash": "9da24ca7508eb181c632829fd698be9a"
+  },
+  "options_page__preview_title": {
+    "message": "Предварительный просмотр",
+    "description": "section title for the Markdown preview section",
+    "hash": "b2ce6f78ea0a002ab97efea02562c3c0"
+  },
+  "__WET_GROUP__about": {
+    "message": "О нас",
+    "hash": "da73d37076fcb711ec18ea36c7efb1d5"
+  },
+  "options_page__about": {
+    "message": "О нас",
+    "hash": "da73d37076fcb711ec18ea36c7efb1d5"
+  },
+  "options_page__report_bugs_title": {
+    "message": "Сообщить об ошибках",
+    "hash": "9f1ec9f89229e160f8f9dd23cc4f9709"
+  },
+  "options_page__create_gitlab_issue": {
+    "message": "Создать новый выпуск GitLab",
+    "description": "Text linking to Gitlab issue creation page",
+    "hash": "43410ee226a64717592bd271c54ac2e0"
+  },
+  "options_page__issue_debug_info": {
+    "message": "Можно использовать следующую информацию об отладке:",
+    "description": "header for some extension debug information",
+    "hash": "5a0b6bc6650dcc7ba9cab037516e48e6"
+  },
+  "options_page__debug_copy_clipboard": {
+    "message": "Копия клипборда",
+    "description": "button for copying debug information to the clipboard",
+    "hash": "17b6a865f4e197dcff670c9ac12517a1"
+  },
+  "options_page__translate": {
+    "message": "Переводить",
+    "description": "Used in a link to open Locale Maker",
+    "hash": "a8d574720117a40a83469771b9a4825d"
+  },
+  "options_page__localemaker_1": {
+    "message": "Locale Maker явно скопирован с расширения FireMonkey для Firefox.",
+    "description": "Description of Locale Maker source.",
+    "hash": "22a4387b17e1ba4776709abc0543afa4"
+  },
+  "options_page__localemaker_2": {
+    "message": "Спасибо Эросману за его создание.",
+    "description": "Credit to Locale Maker author.",
+    "hash": "fa17dd5843873b9c6fe69dfbedb640a3"
+  },
+  "options_page__changelog_title": {
+    "message": "Изменить",
+    "hash": "d1f539e046abe83e76dcf2163f9a143c"
+  },
+  "options_page__changes_saved": {
+    "message": "Изменения сохранены",
+    "description": "message that shows when user changes have been saved",
+    "hash": "d99c431e6bd557568398d89c7e83914b"
+  },
+  "options_page__invalid_hotkey": {
+    "message": "Недействительный горячий ключ!",
+    "description": "message that shows when an invalid hotkey combination was entered",
+    "hash": "54331fedbb67ec446035ce5b0b51b92"
+  },
+  "options_page__reset_button": {
+    "message": "сброс",
+    "description": "used for resetting certain options to the default",
+    "hash": "d25968a7dfc21f95043a86dd5373b81"
+  },
+  "__WET_LOCALE__": {
+    "message": "в",
+    "hash": "e2d59e95a3a41434b5a59d9ac0897d74"
+  }
+}

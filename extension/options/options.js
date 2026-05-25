@@ -1,0 +1,422 @@
+/*
+ * Copyright JFX 2021
+ * MIT License
+ */
+
+/*
+ * Options page UI code
+ */
+
+/* global  Utils:false bootstrap:false */
+
+import HotkeyHandler from "./shortcuts.js"
+import DOMPurify from "../vendor/purify.es.mjs"
+import { markdownRender, resetMarked } from "../markdown-render.js"
+
+import {
+  fetchExtFile,
+  getHljsStyles,
+  getHljsStylesheet,
+  getLanguage,
+  getMessage,
+} from "../async_utils.mjs"
+import OptionsStore from "./options-storage.js"
+;(async () => {
+  const hotkeyHandler = new HotkeyHandler("hotkey-input")
+  const form = document.getElementById("mdh-options-form")
+  const cssSyntaxSelect = document.getElementById("css-syntax-select")
+  const previewInput = document.getElementById("preview_input")
+  const previewIframe = document.getElementById("preview")
+  let inputDirty = true
+  // eslint-disable-next-line no-unused-vars
+  let checkChangeTimeout = null
+  let savedMsgToast
+  let invalidMsgToast
+
+  function showSavedMsg() {
+    inputDirty = true
+    savedMsgToast.show()
+    setTimeout(function () {
+      savedMsgToast.hide()
+    }, 5000)
+  }
+
+  function link_onClicked(e) {
+    const elem = e.target
+    if (elem.localName !== "a") {
+      return
+    }
+    if (elem.protocol === "moz-extension:") {
+      e.preventDefault()
+      messenger.tabs.create({ url: elem.href })
+    } else if (elem.protocol === "https:" || elem.protocol === "http:") {
+      e.preventDefault()
+      messenger.windows.openDefaultBrowser(elem.href)
+    }
+  }
+
+  async function onOptionsLoaded() {
+    try {
+      messenger.management.getSelf().then((info) => {
+        if (info.installType === "development") {
+          const tests_link = document.getElementById("tests-link")
+          tests_link.hidden = false
+        }
+      })
+      // eslint-disable-next-line no-unused-vars
+    } catch (e) {
+      const tests_link = document.getElementById("tests-link")
+      tests_link.hidden = false
+    }
+
+    await localizePage()
+    activatePillNav()
+    if (document.location.hash !== "") {
+      activatePill(document.location.hash)
+    }
+    savedMsgToast = new bootstrap.Toast("#saved-msg")
+    invalidMsgToast = new bootstrap.Toast("#invalid-msg")
+
+    document.addEventListener("click", link_onClicked)
+
+    document.getElementById("copyVersionToClipboard").addEventListener("click", function (e) {
+      e.preventDefault()
+      e.stopPropagation()
+      const copyText = document.getElementById("versionInfo").innerText
+      navigator.clipboard.writeText(copyText)
+      const check = e.target.nextElementSibling
+      check.classList.add("show")
+      setTimeout(function () {
+        check.classList.remove("show")
+      }, 5000)
+    })
+
+    const SyntaxCSSStyles = await getHljsStyles()
+    for (const [name, filename] of Object.entries(SyntaxCSSStyles)) {
+      const opt = new Option(name, filename.toString())
+      cssSyntaxSelect.options.add(opt)
+    }
+
+    if (window.messenger?.runtime) {
+      await fillSupportInfo()
+      await loadChangeList()
+      await setInitialText()
+      let rv = await OptionsStore.get("hotkey-input")
+      let displayShortcut = rv["hotkey-input"]
+      if (navigator.platform === "MacIntel") {
+        const shortcutStruct = hotkeyHandler.setMacShortcutDisplay(displayShortcut)
+        document.getElementById("hotkey-display-str").innerText = shortcutStruct.macShortcut
+        document.getElementById("hotkey-input").value = shortcutStruct.shortcut
+      } else {
+        document.getElementById("hotkey-display-str").innerText = displayShortcut
+      }
+
+      await OptionsStore.syncForm(form)
+      form.addEventListener("options-sync:form-synced", await onOptionsSaved)
+    }
+
+    form.addEventListener("hotkey", handleHotKey)
+    form.addEventListener("invalid-hotkey", handleInvalidHotkey)
+
+    // Reset buttons
+    for (const btn of document.getElementsByClassName("reset-button")) {
+      btn.addEventListener("click", onResetButtonClicked, false)
+    }
+
+    previewIframe.addEventListener("load", handlePreviewLoad)
+    previewInput.addEventListener("input", handleInput, false)
+    previewInput.addEventListener("scroll", setPreviewScroll, false)
+
+    await checkPreviewChanged()
+    await handleUIMode(null, true)
+    handleMathRenderer()
+    handleDirectives()
+    handleEmojiAutocomplete()
+    // await handleBodyText()
+  }
+
+  async function onOptionsSaved(e) {
+    await handleUIMode()
+    handleMathRenderer()
+    await handleInput()
+    handleDirectives()
+    handleEmojiAutocomplete()
+    await handleBodyText()
+    showSavedMsg()
+    await messenger.runtime.sendMessage({ action: "cp.renderer-reset" })
+    await resetMarked()
+  }
+
+  function activatePillNav() {
+    const triggerPillList = document.querySelectorAll("nav  a")
+    triggerPillList.forEach((triggerEl) => {
+      const pillTrigger = new bootstrap.Tab(triggerEl)
+      triggerEl.addEventListener("click", (event) => {
+        event.preventDefault()
+        pillTrigger.show()
+      })
+    })
+  }
+
+  function activatePill(url_hash) {
+    const selector = `nav a.nav-link[data-bs-toggle='pill'][data-bs-target='${url_hash}']`
+    const triggerEl = document.querySelector(selector)
+    bootstrap.Tab.getInstance(triggerEl).show()
+  }
+
+  function escapeHTML(strings, html) {
+    return `${DOMPurify.sanitize(html)}`
+  }
+
+  function handlePreviewLoad() {
+    inputDirty = true
+  }
+
+  function getScrollSize(e) {
+    return e.scrollHeight - e.clientHeight
+  }
+
+  function getScrollPercent() {
+    let size = getScrollSize(previewInput)
+    if (size <= 0) {
+      return 1
+    }
+    return previewInput.scrollTop / size
+  }
+
+  function setPreviewScroll() {
+    let preview_scroll = previewIframe.contentDocument.scrollingElement
+    preview_scroll.scrollTop = getScrollPercent() * getScrollSize(preview_scroll)
+  }
+
+  async function doRender(mdText) {
+    async function getSyntaxCSS() {
+      const syntax_css_name = await OptionsStore.get("syntax-css")
+      return await getHljsStylesheet(syntax_css_name["syntax-css"])
+    }
+    async function getMainCSS() {
+      const main_css = await OptionsStore.get("main-css")
+      return main_css["main-css"]
+    }
+    const syntax_css_p = getSyntaxCSS()
+    const main_css_p = getMainCSS()
+    const html_p = markdownRender(mdText)
+
+    const [main_css, syntax_css, html] = await Promise.all([main_css_p, syntax_css_p, html_p])
+    return { html, main_css, syntax_css }
+  }
+
+  async function checkPreviewChanged() {
+    if (inputDirty) {
+      const response = await doRender(previewInput.value)
+      try {
+        let style_elem = previewIframe.contentDocument.getElementById("main_css")
+        style_elem.replaceChildren(previewIframe.contentDocument.createTextNode(response.main_css))
+
+        style_elem = previewIframe.contentDocument.getElementById("syntax_css")
+        style_elem.replaceChildren(
+          previewIframe.contentDocument.createTextNode(response.syntax_css),
+        )
+
+        previewIframe.contentDocument.body.innerHTML = escapeHTML`${response.html}`
+        setPreviewScroll()
+      } catch (reason) {
+        console.log(`Error rendering preview. ${reason}`)
+      } finally {
+        checkChangeTimeout = setTimeout(checkPreviewChanged, 100)
+        inputDirty = false
+      }
+    }
+  }
+
+  async function setInitialText() {
+    if (previewInput.value === "") {
+      const preview_lang = await getLanguage()
+      previewInput.value = await fetchExtFile(`/_locales/${preview_lang}/preview.md`)
+    }
+  }
+
+  async function handleInput() {
+    if (!inputDirty) {
+      inputDirty = true
+      await checkPreviewChanged()
+    }
+  }
+
+  async function onResetButtonClicked(event) {
+    const btn = event.target.closest("button")
+    const input_target = document.getElementById(btn.dataset.fieldId)
+    await OptionsStore.reset(input_target.name)
+    showSavedMsg()
+  }
+
+  async function fillSupportInfo() {
+    const platform = await messenger.runtime.getPlatformInfo()
+    const browser_info = await messenger.runtime.getBrowserInfo()
+    const appManifest = messenger.runtime.getManifest()
+    document.getElementById("mdhrVersion").innerText = appManifest.version
+    document.getElementById("mdhrThunderbirdVersion").innerText =
+      `${browser_info.name} ${browser_info.version} ${browser_info.buildID}`
+    document.getElementById("mdhrOS").innerText = `${platform.os} ${platform.arch}`
+  }
+
+  async function loadChangeList() {
+    const changesElem = document.getElementById("mdhrChangeList")
+    const changes = await fetchExtFile("/CHANGELOG.md")
+
+    const response = await markdownRender(changes)
+    changesElem.innerHTML = escapeHTML`${response}`
+  }
+
+  /**
+   * The handleHotKey function is called when the user changes the hotkey value in
+   * the options page. It updates both local storage and background script with
+   * new hotkey value, then displays a message to let user know that their change was saved.
+   *
+   * @param e Get the value of the hotkey input field
+   * @return A promise
+   * @docauthor Trelent
+   */
+  async function handleHotKey(e) {
+    const newHotKey = e.detail.value()
+    let displayHotKey = newHotKey
+    if (navigator.platform === "MacIntel") {
+      displayHotKey = e.detail.macHotKey()
+    }
+    await OptionsStore.set({ "hotkey-input": newHotKey })
+    form.dispatchEvent(
+      new CustomEvent("options-sync:form-synced", {
+        bubbles: true,
+      }),
+    )
+    showSavedMsg()
+    document.getElementById("hotkey-display-str").innerText = displayHotKey
+  }
+
+  async function handleInvalidHotkey(e) {
+    inputDirty = true
+    invalidMsgToast.show()
+    setTimeout(function () {
+      invalidMsgToast.hide()
+    }, 5000)
+  }
+
+  async function handleUIMode(e, force = false) {
+    const value_elem = document.getElementById("mode-radio")
+    const old_value = value_elem.dataset.value
+    const mode_elem = document.querySelector("input[name='mdhr-mode']:checked")
+    const new_value = mode_elem.id
+    if (old_value !== new_value || force) {
+      if (new_value === "mdhr-classic") {
+        await enableClassicOptions()
+      } else {
+        await enableModernOptions()
+      }
+      value_elem.dataset.value = new_value
+    }
+  }
+
+  async function enableClassicOptions() {
+    // This is the "Start Composer in Markdown Mode" checkbox, disabled in Classic Mode
+    await OptionsStore.set({ "enable-markdown-mode": false })
+    let elem = document.getElementById("markdown-mode")
+    elem.disabled = true
+    // This is the "Forgot to Render" option, enable it in Classic Mode
+    elem = document.getElementById("forgot-to-render")
+    elem.disabled = false
+    await messenger.runtime.sendMessage({ action: "mdhr-mode-set", mode: "classic" })
+  }
+
+  async function enableModernOptions() {
+    // This is the "Start Composer in Markdown Mode" checkbox, enabled in Modern Mode
+    let elem = document.getElementById("markdown-mode")
+    elem.disabled = false
+    elem.checked = true
+    await OptionsStore.set({ "enable-markdown-mode": true })
+    // This is the "Forgot to Render" option, disable it in Modern Mode
+    elem = document.getElementById("forgot-to-render")
+    elem.disabled = true
+    await messenger.runtime.sendMessage({ action: "mdhr-mode-set", mode: "modern" })
+  }
+
+  function handleMathRenderer(e) {
+    // Run when enabling/disabling/changing Math Renderer
+    let enabled = document.getElementById("math-renderer-enabled")
+    if (enabled.checked) {
+      document.querySelectorAll("[name=math-renderer]").forEach((elem) => {
+        elem.disabled = false
+      })
+      let value = document.querySelector("[name=math-renderer]:checked")?.value
+      if (!value) {
+        document.getElementById("math-renderer-texzilla").checked = true
+        value = "texzilla"
+      }
+      let e_math_url = document.getElementById("math-value")
+      let e_math_url_reset = document.getElementById("math-reset-button")
+      if (value === "codecogs") {
+        e_math_url.disabled = false
+        e_math_url_reset.disabled = false
+      } else {
+        e_math_url.disabled = true
+        e_math_url_reset.disabled = true
+      }
+    } else {
+      document.querySelectorAll("[name=math-renderer]").forEach((elem) => {
+        elem.disabled = true
+      })
+      document.getElementById("math-value").disabled = true
+      document.getElementById("math-reset-button").disabled = true
+    }
+  }
+
+  function handleDirectives(e) {
+    let enabled = document.getElementById("buglink-enabled")
+    document.querySelectorAll("#buglink-extras input.form-text").forEach((elem) => {
+      elem.disabled = !enabled.checked
+    })
+  }
+
+  function handleEmojiAutocomplete(e) {
+    const enabled = document.getElementById("emoji-shortcode")
+    const autocomplete_checkbox = document.getElementById("emoji-autocomplete")
+    autocomplete_checkbox.disabled = !enabled.checked
+  }
+
+  async function handleBodyText(e) {
+    const body_text = document.getElementById("use-bodytext-format")
+    if (body_text.checked) {
+      await messenger.reply_prefs.setUseParagraph(false)
+    } else {
+      await messenger.reply_prefs.setUseParagraph(true)
+    }
+  }
+
+  async function localizePage() {
+    const page_prefix = "options_page"
+    const text_nodes = document.body.querySelectorAll("[data-i18n]")
+    for (let n of text_nodes) {
+      let message_id = `${page_prefix}__${n.dataset.i18n}`
+      let arg_str = n.dataset.i18nArg
+      let arg = null
+      if (arg_str !== undefined) {
+        // arg_str is '__message_id'
+        arg = getMessage(arg_str.substring(2))
+      }
+      let message = getMessage(message_id, arg)
+      if (message) {
+        if (n.dataset.i18nHtml === "true") {
+          n.innerHTML = escapeHTML`${message}`
+        } else {
+          n.textContent = message
+        }
+      }
+      if (n.title) {
+        message = getMessage(`${message_id}-Title`)
+        if (message) {
+          n.title = message
+        }
+      }
+    }
+  }
+  await onOptionsLoaded()
+})()

@@ -1,0 +1,381 @@
+{
+  "app_name": {
+    "message": "Markdown Here Revival",
+    "description": "This is the name of the extension, the placeholder $APPNAME$ is used the remaining strings.",
+    "hash": "edf09063590176700ead1a22bf3a5937"
+  },
+  "app_slogan": {
+    "message": "Mozilla Thunderbird 용 Markdown 이메일",
+    "hash": "7aa2f8c03f41e6629904f5833dac94a7"
+  },
+  "__WET_GROUP__application": {
+    "message": "제품 설명",
+    "hash": "705a7139d345ac5faa9a3cfc7114e189"
+  },
+  "toggle_button_tooltip_enable": {
+    "message": "Enable markdown 미리보기",
+    "description": "text shown when user hovers mouse over Markdown Toggle button",
+    "hash": "d9cb83c089cf43059f988f5bb25d6ad9"
+  },
+  "toggle_button_tooltip_disable": {
+    "message": "Disable markdown 미리보기",
+    "description": "text shown when user hovers mouse over Markdown Toggle button",
+    "hash": "6569e1487fed213bcf1513bb93fb12fc"
+  },
+  "upgrade_notification_text": {
+    "message": "$APPNAME$ 업데이트 되었습니다",
+    "description": "Text on the notification shown when Markdown Here has been updated",
+    "placeholders": {
+      "appname": {
+        "content": "$1"
+      }
+    },
+    "hash": "76796ecd460f742236be591169ce278b"
+  },
+  "update_notes_button": {
+    "message": "업데이트 노트",
+    "hash": "fef3aae852e44ea637393db11e0da28a"
+  },
+  "cancel_button": {
+    "message": "이름 *",
+    "hash": "17aa19f18a894459ab6ff21156e8a341"
+  },
+  "forgot_to_render_back_button": {
+    "message": "뒤로",
+    "description": "Text on the Back (cancel) button of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email",
+    "hash": "16a5bc1e5d6a2e5bbb1b35ca483971e8"
+  },
+  "forgot_to_render_prompt_close_hover": {
+    "message": "이 통지를 취소",
+    "description": "Text that shows when the user hovers over the 'X' that will close the prompt",
+    "hash": "48f8b404a3afd15f165abe500bf625c0"
+  },
+  "forgot_to_render_prompt_info": {
+    "message": "Markdown에서이 이메일을 썼지만 그것을 꽤 잊었다.",
+    "description": "Informational part of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email",
+    "hash": "7a6bf5503a66dfc42914e6fec5a668ba"
+  },
+  "forgot_to_render_prompt_question": {
+    "message": "이대로 보내시겠습니까?",
+    "description": "Question part of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email",
+    "hash": "5ceefbf6f6675554ec47ed2fac4edc4d"
+  },
+  "forgot_to_render_send_button": {
+    "message": "보내기",
+    "description": "Text on the Send (continue) button of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email",
+    "hash": "f654735fe65fdb8b2c7bd00ce5c4096d"
+  },
+  "set_math_api_url": {
+    "message": "설정에서 Math 렌더링 API URL을 설정합니다.",
+    "description": "A message displayed when math rendering is set to use Gchart but an invalid URL is set.",
+    "hash": "265f98a913e4f279878a79f3dabbb39c"
+  },
+  "reset_preview": {
+    "message": "재설정 미리보기",
+    "description": "Context menu item displayed on the compose action that resets the live preview to a usable state.",
+    "hash": "6ca043613138c5e1b2e3b20df003c175"
+  },
+  "edit_as_new_markdown_message": {
+    "message": "새로운 Markdown 메시지로 편집",
+    "description": "Context menu item displayed from message list",
+    "hash": "6c44fa4651ec2a7ba8c69cbb5d6f7602"
+  },
+  "__WET_GROUP__settings": {
+    "message": "확장 설정 페이지",
+    "hash": "ce17411c17caa2a7736b05051cd1b2e2"
+  },
+  "options_page__page_title": {
+    "message": "$APPNAME$ 옵션",
+    "placeholders": {
+      "appname": {
+        "content": "$1"
+      }
+    },
+    "hash": "fefb9554fa7cc03466d11dd0e706bb2e"
+  },
+  "__WET_GROUP__options": {
+    "message": "제품 설명",
+    "hash": "531dad0078a72193602b18495f0ad4e9"
+  },
+  "options_page__options_title": {
+    "message": "제품 설명",
+    "hash": "531dad0078a72193602b18495f0ad4e9"
+  },
+  "options_page__interface_mode": {
+    "message": "사용자 인터페이스",
+    "description": "Label for selecting the user interface mode (eg. modern or classic modes)",
+    "hash": "a827c951ef7fe2da75ebc58baf88287f"
+  },
+  "options_page__mdhr_classic_mode": {
+    "message": "미리 4.0 (classic) 형태를 사용하십시오",
+    "description": "Label for selecting classic UI",
+    "hash": "ca33d5b7a452b6e1fdd82d32b42b844f"
+  },
+  "options_page__mdhr_modern_mode": {
+    "message": "라이브 미리보기 (modern) 모드 사용",
+    "description": "Label for selecting modern UI",
+    "hash": "fd781763933043b55578498058686099"
+  },
+  "options_page__forgot_to_render_label2": {
+    "message": "자주 묻는 질문",
+    "description": "Label for the checkbox that enables the forgot-to-render feature",
+    "hash": "303a6d031665e54b24debeb7fd5827b7"
+  },
+  "options_page__forgot_to_render_2": {
+    "message": "이메일을 보낼 때, 이것은 당신이 Markdown에서 그것을 썼는 것처럼 보이는 경우 내용을 확인,\n하지만 렌더링을 잊었다 (즉, 클릭 'Markdown Toggle') 전송 하기 전에.\n메일을 보낼 수있는 능력과 방해 할 수 있습니다.",
+    "description": "Descriptive text explaining the 'forgot-to-render' feature.",
+    "hash": "1c100cda3b6f6da50138458b785b47cb"
+  },
+  "options_page__composer_start_markdown_mode": {
+    "message": "markdown 모드에서 컴파일러 시작",
+    "hash": "97a0a3d24c0345f5347393de128d07d0"
+  },
+  "options_page__features_title": {
+    "message": "Markdown 기능",
+    "description": "Heading for a set of options to enable or disable various features of the Markdown rendering",
+    "hash": "e04d60a1956f82aa35a56aac12b6aaf3"
+  },
+  "options_page__gfm_line_breaks_enabled_label": {
+    "message": "GFM 라인 휴식.",
+    "description": "Label for the checkbox that enables the support of 'Github-flavored Markdown' line breaks.",
+    "hash": "5ac5728cb528e8d8edaa61ca7fbd6255"
+  },
+  "options_page__smart_replacements_enabled_label": {
+    "message": "Enable 'smart' 타이그래픽 교체",
+    "description": "Label for enabling the smart replacements feature",
+    "hash": "d53c8006f33df32034b4e13dec238738"
+  },
+  "options_page__smart_replacements_2": {
+    "message": "스마트 교체는 다음과 같습니다 : unicode 견적, en- 및 em-dash, ellipses 및 화살표 교체",
+    "description": "An explanation of what smart replacements are",
+    "hash": "5f91244199941f295456a0c754f51ddf"
+  },
+  "options_page__emoji_shortcode_enabled_label": {
+    "message": "사용 가능 : 이모티콘: (Github 스타일) 단축코드",
+    "description": "Label for enabling emoji shortcodes",
+    "hash": "b20f1c09d205160478c354cfd2aefc59"
+  },
+  "options_page__emoji_autocomplete_enabled_label": {
+    "message": "Enable Emoji 자동 완성 팝업",
+    "description": "Label for enabling an auto-complete popup for emoji shortcodes",
+    "hash": "c3f3aa4d8b7861ec6924305a7ae2e055"
+  },
+  "options_page__hotkey_title": {
+    "message": "핫키 (카 키보드 단축키)",
+    "description": "A section title",
+    "hash": "50ef7c2fb35b7df36ea871c4b23d151a"
+  },
+  "options_page__tex_math_title": {
+    "message": "TeX Mathematical 공식 지원",
+    "hash": "8c09b9f03c93800e4f601e57c374eec5"
+  },
+  "options_page__tex_math_texzilla_label": {
+    "message": "TeXZilla 및 HTML 캔버스 렌더링",
+    "description": "Label for tex math rendering option",
+    "hash": "c210e3a6960c6d788491ac424f16c7a3"
+  },
+  "options_page__tex_math_texzilla_label-Title": {
+    "message": "Math Formulae는 브라우저 캔버스를 사용하여 TeXZilla.js로 렌더링됩니다. 네트워크 요청이 전송되지 않습니다.",
+    "description": "description how math is rendered when TexZilla option is selected",
+    "hash": "ead94268f19cef4441fc69f97689d9b6"
+  },
+  "options_page__tex_math_codecogs_label": {
+    "message": "CodeCogs Equation Rendering API를 사용하여 수학 렌더링",
+    "description": "Label for CodeCogs math rendering option",
+    "hash": "cd4b796d4e49c47a088f617a627362d8"
+  },
+  "options_page__tex_math_codecogs_customization_1": {
+    "message": "수식에 대한 이미지를 생성하려면, 요청은 CodeCogs로 보내집니다. 그것은 효과적으로 CodeCogs로 공식을 공유한다는 것을 의미합니다. 또한 메시지의 수신자는 CodeCogs에 요청을 작성하여 이미지를 렌더링합니다.",
+    "description": "one of the CodeCogs TeX math privacy concerns",
+    "hash": "23d26e0ef10e5ea0c7139101b74a41c8"
+  },
+  "options_page__tex_math_codecogs_customization_2": {
+    "message": "사용자 정의 옵션을 얻으려면 $LINK$CodeCogs 문서를 참조$CLOSELINK$ 이 서비스에 대한.",
+    "description": "Link to CodeCogs documentation - do not translate $PLACEHOLDERS$",
+    "placeholders": {
+      "link": {
+        "content": "<a href=\"https://editor.codecogs.com/docs/4-LaTeX_rendering.php\" target=\"_blank\">"
+      },
+      "closelink": {
+        "content": "</a>"
+      }
+    },
+    "hash": "d108daece31e555fb937bda04f5d6c32"
+  },
+  "options_page__tex_math_codecogs_customization_3": {
+    "message": "TeX 공식을 만드는 좋은 자원은 $LINK$CodeCogs Equation Editor$입니다. 영업시간LINK$.",
+    "description": "More info about CodeCogs - do not translate $PLACEHOLDERS$",
+    "placeholders": {
+      "link": {
+        "content": "<a href=\"https://editor.codecogs.com/\" target=\"_blank\">"
+      },
+      "closelink": {
+        "content": "</a>"
+      }
+    },
+    "hash": "2e8aa3d8baaa90e12a7b9c89f9859ba0"
+  },
+  "options_page__buglink_description": {
+    "message": "`#12345`와 같은 버그 또는 문제 추적기에 대한 링크 만들기. 아래 필드는 링크의 URL과 텍스트를 템플릿에 사용됩니다.",
+    "description": "Description of bug/issue link feature.",
+    "hash": "7569aed609aa4c28943b4f66218c3f16"
+  },
+  "options_page__buglink_enabled_label": {
+    "message": "Enable Bug/Issue 링크",
+    "description": "Enable Bug or Issue linking",
+    "hash": "ff6080e1ffeb0eefb573565c4cdd4134"
+  },
+  "options_page__buglink_url": {
+    "message": "링크 URL",
+    "description": "Template field for creating bug/issue links",
+    "hash": "1df9e2c05db77316a3a97275017967b7"
+  },
+  "options_page__buglink_text": {
+    "message": "링크 텍스트",
+    "description": "Template for bug/issue link text",
+    "hash": "6d3723ccc9b4bf5a55cb0ca849b9438e"
+  },
+  "__WET_GROUP__usage": {
+    "message": "이용 방법",
+    "hash": "71ec48cc2984647ec331a3bcee3a9610"
+  },
+  "options_page__howto": {
+    "message": "이용 방법",
+    "hash": "71ec48cc2984647ec331a3bcee3a9610"
+  },
+  "options_page__basic_usage": {
+    "message": "기본 사용법",
+    "hash": "1725d6ca5bc388ea2f5286d5f59eca84"
+  },
+  "options_page__start_new_message_toggle": {
+    "message": "새 이메일 메시지를 시작하세요. Format toolbar에서 동작 버튼으로 markdown 모드를 수정합니다.",
+    "hash": "a3cf8f8bcf6c08e2ba178c9a999bda2a"
+  },
+  "options_page__type_some_markdown": {
+    "message": "일부 Markdown을 이메일로 입력합니다. 이 시도:",
+    "hash": "f0db9e92b6eead27204d516a3034a2fc"
+  },
+  "options_page__short_markdown_example": {
+    "message": "`Markdown```````` **Here** _Revival_!",
+    "hash": "67f19cc4f24de8f9b404819ab7633356"
+  },
+  "options_page__compose_live_preview": {
+    "message": "라이브 미리보기 업데이트로 메시지를 작성합니다.",
+    "hash": "549af642c5b973f9b4c4c304eb004475"
+  },
+  "options_page__compose_send_message": {
+    "message": "메시지 보내기!",
+    "hash": "4ab42a8334e6c82218c00d007d10fae5"
+  },
+  "options_page__toggle_hotkey": {
+    "message": "또는 단축키를 사용하십시오:",
+    "description": "A step suggestion in the basic usage instructions",
+    "hash": "64f745514a24fa38ae148ef25745c835"
+  },
+  "options_page__resources_title": {
+    "message": "자료 및 링크",
+    "description": "A section title",
+    "hash": "d3acbfafa858245f2345f00786324790"
+  },
+  "options_page__resources_cheatsheet_link": {
+    "message": "Markdown 여기에 속임수",
+    "hash": "ddb4af27f215d4704f3f31878374c20f"
+  },
+  "options_page__mdhr_wiki": {
+    "message": "Markdown 여기에 Revival 위키",
+    "hash": "31514a95d56ddc2d8df5c4d15439d17f"
+  },
+  "options_page__tips_tricks_link": {
+    "message": "팁과 트릭",
+    "hash": "c17546aca51dff7b1014d20502cb526"
+  },
+  "__WET_GROUP__theme": {
+    "message": "이름 *",
+    "hash": "9da24ca7508eb181c632829fd698be9a"
+  },
+  "options_page__primary_css_title": {
+    "message": "기본 스타일링 CSS",
+    "description": "section title",
+    "hash": "1381af5b005843fe11ee6884b0093683"
+  },
+  "options_page__syntax_highlighting_css_title": {
+    "message": "Syntax 하이라이트 CSS",
+    "description": "section title",
+    "hash": "697181e7fed87c2b2c17dab7b3e1cf25"
+  },
+  "options_page__syntax_highlighting_theme_label": {
+    "message": "테마",
+    "description": "label for the syntax highlighting theme combo box",
+    "hash": "9da24ca7508eb181c632829fd698be9a"
+  },
+  "options_page__preview_title": {
+    "message": "미리 보기",
+    "description": "section title for the Markdown preview section",
+    "hash": "b2ce6f78ea0a002ab97efea02562c3c0"
+  },
+  "__WET_GROUP__about": {
+    "message": "제품정보",
+    "hash": "da73d37076fcb711ec18ea36c7efb1d5"
+  },
+  "options_page__about": {
+    "message": "제품정보",
+    "hash": "da73d37076fcb711ec18ea36c7efb1d5"
+  },
+  "options_page__report_bugs_title": {
+    "message": "버그 보고",
+    "hash": "9f1ec9f89229e160f8f9dd23cc4f9709"
+  },
+  "options_page__create_gitlab_issue": {
+    "message": "GitLab의 새로운 이슈 만들기",
+    "description": "Text linking to Gitlab issue creation page",
+    "hash": "43410ee226a64717592bd271c54ac2e0"
+  },
+  "options_page__issue_debug_info": {
+    "message": "다음 디버그 정보는 다음과 같습니다.",
+    "description": "header for some extension debug information",
+    "hash": "5a0b6bc6650dcc7ba9cab037516e48e6"
+  },
+  "options_page__debug_copy_clipboard": {
+    "message": "클립보드에 복사",
+    "description": "button for copying debug information to the clipboard",
+    "hash": "17b6a865f4e197dcff670c9ac12517a1"
+  },
+  "options_page__translate": {
+    "message": "이름 *",
+    "description": "Used in a link to open Locale Maker",
+    "hash": "a8d574720117a40a83469771b9a4825d"
+  },
+  "options_page__localemaker_1": {
+    "message": "Locale Maker는 Firefox의 FireMonkey 확장에서 즉시 복사됩니다.",
+    "description": "Description of Locale Maker source.",
+    "hash": "22a4387b17e1ba4776709abc0543afa4"
+  },
+  "options_page__localemaker_2": {
+    "message": "감사합니다.",
+    "description": "Credit to Locale Maker author.",
+    "hash": "fa17dd5843873b9c6fe69dfbedb640a3"
+  },
+  "options_page__changelog_title": {
+    "message": "공지사항",
+    "hash": "d1f539e046abe83e76dcf2163f9a143c"
+  },
+  "options_page__changes_saved": {
+    "message": "변경 내용이 저장되었습니다",
+    "description": "message that shows when user changes have been saved",
+    "hash": "d99c431e6bd557568398d89c7e83914b"
+  },
+  "options_page__invalid_hotkey": {
+    "message": "잘못된 단축키!",
+    "description": "message that shows when an invalid hotkey combination was entered",
+    "hash": "54331fedbb67ec446035ce5b0b51b92"
+  },
+  "options_page__reset_button": {
+    "message": "지원하다",
+    "description": "used for resetting certain options to the default",
+    "hash": "d25968a7dfc21f95043a86dd5373b81"
+  },
+  "__WET_LOCALE__": {
+    "message": "이름 *",
+    "hash": "e2d59e95a3a41434b5a59d9ac0897d74"
+  }
+}

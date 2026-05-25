@@ -1,0 +1,312 @@
+{
+  "app_name": {
+    "message": "Markdown Here Revival",
+    "description": "This is the name of the extension, the placeholder $APPNAME$ is used the remaining strings."
+  },
+  "app_slogan": {
+    "message": "Markdown emails for Mozilla Thunderbird"
+  },
+
+  "__WET_GROUP__application": { "message": "Application" },
+  "toggle_button_tooltip_enable": {
+    "message": "Enable markdown preview",
+    "description": "text shown when user hovers mouse over Markdown Toggle button"
+  },
+  "toggle_button_tooltip_disable": {
+    "message": "Disable markdown preview",
+    "description": "text shown when user hovers mouse over Markdown Toggle button"
+  },
+  "upgrade_notification_text": {
+    "message": "$APPNAME$ updated",
+    "description": "Text on the notification shown when Markdown Here has been updated",
+    "placeholders": {
+      "appname": { "content": "$1" }
+    }
+  },
+  "update_notes_button": {
+    "message": "Update Notes"
+  },
+  "cancel_button": {
+    "message": "Cancel"
+  },
+  "forgot_to_render_back_button": {
+    "message": "Back",
+    "description": "Text on the Back (cancel) button of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email"
+  },
+  "forgot_to_render_prompt_close_hover": {
+    "message": "Dismiss this notification",
+    "description": "Text that shows when the user hovers over the 'X' that will close the prompt"
+  },
+  "forgot_to_render_prompt_info": {
+    "message": "It looks like you wrote this email in Markdown but forgot to make it pretty.",
+    "description": "Informational part of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email"
+  },
+  "forgot_to_render_prompt_question": {
+    "message": "Send it anyway?",
+    "description": "Question part of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email"
+  },
+  "forgot_to_render_send_button": {
+    "message": "Send",
+    "description": "Text on the Send (continue) button of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email"
+  },
+  "set_math_api_url": {
+    "message": "Set an API URL for Math rendering in Settings.",
+    "description": "A message displayed when math rendering is set to use Gchart but an invalid URL is set."
+  },
+  "reset_preview": {
+    "message": "Reset Preview",
+    "description": "Context menu item displayed on the compose action that resets the live preview to a usable state."
+  },
+  "edit_as_new_markdown_message": {
+    "message": "Edit as new Markdown message",
+    "description": "Context menu item displayed from message list"
+  },
+
+  "__WET_GROUP__settings": { "message": "Extension Settings Pages" },
+  "options_page__page_title": {
+    "message": "$APPNAME$ Options",
+    "placeholders": {
+      "appname": { "content": "$1" }
+    }
+  },
+
+  "__WET_GROUP__options": { "message": "Options" },
+  "options_page__options_title": {
+    "message": "Options"
+  },
+  "options_page__interface_mode": {
+    "message": "User Interface",
+    "description": "Label for selecting the user interface mode (eg. modern or classic modes)"
+  },
+  "options_page__mdhr_classic_mode": {
+    "message": "Use pre-4.0 (classic) mode",
+    "description": "Label for selecting classic UI"
+  },
+  "options_page__mdhr_modern_mode": {
+    "message": "Use live preview (modern) mode",
+    "description": "Label for selecting modern UI"
+  },
+  "options_page__forgot_to_render_label2": {
+    "message": "Enable forgot-to-render check",
+    "description": "Label for the checkbox that enables the forgot-to-render feature"
+  },
+  "options_page__forgot_to_render_2": {
+    "message": "When you send an email, this checks the content to see if it looks like you wrote it in Markdown,\nbut forgot to render it (i.e., click 'Markdown Toggle') before sending.\nThis may need to be disabled if it interferes with your ability to send email.",
+    "description": "Descriptive text explaining the 'forgot-to-render' feature."
+  },
+  "options_page__composer_start_markdown_mode": {
+    "message": "Start composer in markdown mode"
+  },
+  "options_page__use_bodytext_format_label": {
+    "message": "Use Body Text format in composer",
+    "description": "Label for the checkbox that enables the Body Text format"
+  },
+  "use_paragraph_setting_label": {
+    "message": "Use Paragraph format instead of Body Text by default",
+    "description": "This string must match the Fluent string 'default-format-label' in preferences.ftl"
+  },
+  "options_page__use_bodytext_format_description": {
+    "message": "This add-on works best when “$PREF_STRING$” is disabled in Thunderbird's Settings. Enable this option to apply the recommended setting.",
+    "description": "Description of the 'Use Body Text Format' option.",
+    "placeholders": {
+      "pref_string": { "content": "$1" }
+    }
+  },
+  "options_page__features_title": {
+    "message": "Markdown Features",
+    "description": "Heading for a set of options to enable or disable various features of the Markdown rendering"
+  },
+  "options_page__gfm_line_breaks_enabled_label": {
+    "message": "Enable GFM line breaks.",
+    "description": "Label for the checkbox that enables the support of 'Github-flavored Markdown' line breaks."
+  },
+  "options_page__smart_replacements_enabled_label": {
+    "message": "Enable 'smart' typographic replacements",
+    "description": "Label for enabling the smart replacements feature"
+  },
+  "options_page__smart_replacements_2": {
+    "message": "Smart replacements include: unicode quotes, en- and em-dash, ellipses, and arrow replacements",
+    "description": "An explanation of what smart replacements are"
+  },
+  "options_page__emoji_shortcode_enabled_label": {
+    "message": "Enable :emoji: (Github style) Shortcodes",
+    "description": "Label for enabling emoji shortcodes"
+  },
+  "options_page__emoji_autocomplete_enabled_label": {
+    "message": "Enable Emoji auto-complete popup",
+    "description": "Label for enabling an auto-complete popup for emoji shortcodes"
+  },
+  "options_page__hotkey_title": {
+    "message": "Hotkey (aka keyboard shortcut)",
+    "description": "A section title"
+  },
+  "options_page__tex_math_title": {
+    "message": "TeX Mathematical Formulae Support"
+  },
+  "options_page__tex_math_texzilla_label": {
+    "message": "TeXZilla and HTML Canvas rendering",
+    "description": "Label for tex math rendering option"
+  },
+  "options_page__tex_math_texzilla_label-Title": {
+    "message": "Math formulae are rendered with TeXZilla.js using the browser canvas. No network request is sent.",
+    "description": "description how math is rendered when TexZilla option is selected"
+  },
+  "options_page__tex_math_codecogs_label": {
+    "message": "Math rendering using CodeCogs Equation Rendering API",
+    "description": "Label for CodeCogs math rendering option"
+  },
+  "options_page__tex_math_codecogs_customization_1": {
+    "message": "To generate the image for the formula, a request is sent to CodeCogs. That effectively means that you are sharing your formula with CodeCogs. It also means that recipients of your message will be making a request to CodeCogs to have the image rendered.",
+    "description": "one of the CodeCogs TeX math privacy concerns"
+  },
+  "options_page__tex_math_codecogs_customization_2": {
+    "message": "For render customization options, see the $LINK$CodeCogs documentation$CLOSELINK$ for this service.",
+    "description": "Link to CodeCogs documentation - do not translate $PLACEHOLDERS$",
+    "placeholders": {
+      "link": {
+        "content": "<a href=\"https://editor.codecogs.com/docs/4-LaTeX_rendering.php\" target=\"_blank\">"
+      },
+      "closelink": {
+        "content": "</a>"
+      }
+    }
+  },
+  "options_page__tex_math_codecogs_customization_3": {
+    "message": "A good resource for creating TeX formulae is the $LINK$CodeCogs Equation Editor$CLOSELINK$.",
+    "description": "More info about CodeCogs - do not translate $PLACEHOLDERS$",
+    "placeholders": {
+      "link": {
+        "content": "<a href=\"https://editor.codecogs.com/\" target=\"_blank\">"
+      },
+      "closelink": {
+        "content": "</a>"
+      }
+    }
+  },
+  "options_page__buglink_description": {
+    "message": "Create links to bug or issue trackers like `#12345`. The fields below are used to template the URL and text of the links.",
+    "description": "Description of bug/issue link feature."
+  },
+  "options_page__buglink_enabled_label": {
+    "message": "Enable Bug/Issue links",
+    "description": "Enable Bug or Issue linking"
+  },
+  "options_page__buglink_url": {
+    "message": "Link URL",
+    "description": "Template field for creating bug/issue links"
+  },
+  "options_page__buglink_text": {
+    "message": "Link Text",
+    "description": "Template for bug/issue link text"
+  },
+
+  "__WET_GROUP__usage": { "message": "Howto" },
+  "options_page__howto": {
+    "message": "Howto"
+  },
+  "options_page__basic_usage": {
+    "message": "Basic Usage"
+  },
+  "options_page__disable_paragraph_format": {
+    "message": "Disable Paragraph format in Thunderbird settings."
+  },
+  "options_page__start_new_message_toggle": {
+    "message": "Start a new email message. Toggle the composer to markdown mode with the action button on the format toolbar."
+  },
+  "options_page__type_some_markdown": {
+    "message": "Type some Markdown into the email. Try this:"
+  },
+  "options_page__short_markdown_example": {
+    "message": "`Markdown` **Here** _Revival_!"
+  },
+  "options_page__compose_live_preview": {
+    "message": "The live preview updates as you write your message."
+  },
+  "options_page__compose_send_message": {
+    "message": "Send your message!"
+  },
+  "options_page__toggle_hotkey": {
+    "message": "Or use the hotkey:",
+    "description": "A step suggestion in the basic usage instructions"
+  },
+  "options_page__resources_title": {
+    "message": "Resources and Links",
+    "description": "A section title"
+  },
+  "options_page__resources_cheatsheet_link": {
+    "message": "Markdown Here Cheatsheet"
+  },
+  "options_page__mdhr_wiki": {
+    "message": "Markdown Here Revival wiki"
+  },
+  "options_page__tips_tricks_link": {
+    "message": "Tips and Tricks"
+  },
+
+  "__WET_GROUP__theme": { "message": "Theme" },
+  "options_page__primary_css_title": {
+    "message": "Primary Styling CSS",
+    "description": "section title"
+  },
+  "options_page__syntax_highlighting_css_title": {
+    "message": "Syntax Highlighting CSS",
+    "description": "section title"
+  },
+  "options_page__syntax_highlighting_theme_label": {
+    "message": "Theme",
+    "description": "label for the syntax highlighting theme combo box"
+  },
+  "options_page__preview_title": {
+    "message": "Preview",
+    "description": "section title for the Markdown preview section"
+  },
+
+  "__WET_GROUP__about": { "message": "About" },
+  "options_page__about": {
+    "message": "About"
+  },
+  "options_page__report_bugs_title": {
+    "message": "Report bugs"
+  },
+  "options_page__create_gitlab_issue": {
+    "message": "Create new issue on GitLab",
+    "description": "Text linking to Gitlab issue creation page"
+  },
+  "options_page__issue_debug_info": {
+    "message": "The following debug info can be used:",
+    "description": "header for some extension debug information"
+  },
+  "options_page__debug_copy_clipboard": {
+    "message": "Copy to clipboard",
+    "description": "button for copying debug information to the clipboard"
+  },
+  "options_page__translate": {
+    "message": "Translate",
+    "description": "Used in a link to open Locale Maker"
+  },
+  "options_page__localemaker_1": {
+    "message": "Locale Maker is blatantly copied from the FireMonkey extension for Firefox.",
+    "description": "Description of Locale Maker source."
+  },
+  "options_page__localemaker_2": {
+    "message": "Thank you to erosman for its creation.",
+    "description": "Credit to Locale Maker author."
+  },
+  "options_page__changelog_title": {
+    "message": "Changelog"
+  },
+  "options_page__changes_saved": {
+    "message": "Changes saved",
+    "description": "message that shows when user changes have been saved"
+  },
+  "options_page__invalid_hotkey": {
+    "message": "Invalid hotkey!",
+    "description": "message that shows when an invalid hotkey combination was entered"
+  },
+  "options_page__reset_button": {
+    "message": "Reset",
+    "description": "used for resetting certain options to the default"
+  },
+
+  "__WET_LOCALE__": { "message": "en" }
+}

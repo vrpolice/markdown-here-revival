@@ -1,0 +1,6 @@
+node_modules/
+web-ext-artifacts/
+__pycache__/
+*.pyc
+.mdhr_test_profiles/
+.claude/
