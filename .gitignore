@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 .mdhr_test_profiles/
 .claude/
+CLAUDE.md
