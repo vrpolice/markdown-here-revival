@@ -169,23 +169,6 @@
     .feature-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
     .feature-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.55; }
 
-    /* ===== Screenshots ===== */
-    .screenshots { background: var(--gradient-subtle); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .screenshot-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-      gap: 32px;
-    }
-    .screenshot-card { text-align: center; }
-    .screenshot-card img {
-      width: 100%; border-radius: var(--radius);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-md);
-    }
-    .screenshot-card p {
-      margin-top: 12px; font-size: 0.9rem; color: var(--muted); font-weight: 500;
-    }
-
     /* ===== Code / How It Works ===== */
     .workflow {
       display: grid;
@@ -357,7 +340,6 @@
     </a>
     <ul class="nav-links">
       <li><a href="#features">Features</a></li>
-      <li><a href="#screenshots">Screenshots</a></li>
       <li><a href="#install">Install</a></li>
       <li><a href="#about">About</a></li>
     </ul>
@@ -441,26 +423,6 @@
         <div class="feature-icon">🌙</div>
         <h3>Dark Mode Ready</h3>
         <p>Theme-aware icons and CSS. Your rendered emails look great in light or dark Thunderbird.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Screenshots -->
-<section class="screenshots section" id="screenshots">
-  <div class="container">
-    <div class="section-header">
-      <h2>See It in Action</h2>
-      <p>Compose in Markdown on the left, see rendered HTML on the right — all within Thunderbird's compose window.</p>
-    </div>
-    <div class="screenshot-grid">
-      <div class="screenshot-card">
-        <img src="images/darkmode-edit.png" alt="Editing Markdown in Thunderbird dark mode" loading="lazy">
-        <p>Composing an email in Markdown (Dark Mode)</p>
-      </div>
-      <div class="screenshot-card">
-        <img src="images/darkmode-rendered.png" alt="Rendered HTML output in Thunderbird dark mode" loading="lazy">
-        <p>Rendered HTML ready to send (Dark Mode)</p>
       </div>
     </div>
   </div>
