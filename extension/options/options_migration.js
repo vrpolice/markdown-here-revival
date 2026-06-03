@@ -131,6 +131,11 @@ export async function migrate_badMathValue(options, defaults) {
 }
 
 export async function migrate_MainCSS(options, defaults) {
+  // Fix empty CSS caused by race condition (v4.0.15 regression)
+  if (!options["main-css"] || options["main-css"].trim() === "") {
+    console.log("main-css is empty, resetting to default.")
+    return { "main-css": defaults["main-css"] }
+  }
   let sha256 = await sha256Digest(options["main-css"])
   if (sha256 !== DEFAULT_CSS_SUM) {
     if (OLD_CSS_SUMS.includes(sha256)) {

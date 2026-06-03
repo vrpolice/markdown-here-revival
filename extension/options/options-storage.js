@@ -74,16 +74,38 @@ export function MDHROptionsMigrate() {
   return MDHROptionsStore()
 }
 
-async function MDHROptionsStore() {
-  let main_css_default = await fetchExtFile("/default.css")
-  let DEFAULTS = Object.assign({}, kOptDefaults, { "main-css": main_css_default })
+function MDHROptionsStore() {
+  let DEFAULTS = Object.assign({}, kOptDefaults)
 
-  return new OptionsSync({
+  // Start fetching the default CSS immediately. We patch _runMigrations and
+  // _getAll below to wait for it, preventing the race where an empty
+  // "main-css" default is stored before the fetch completes.
+  const cssReady = fetchExtFile("/default.css").then((css) => {
+    DEFAULTS["main-css"] = css
+  })
+
+  const store = new OptionsSync({
     defaults: DEFAULTS,
     migrations: MIGRATIONS,
     logging: false,
   })
+
+  // Ensure migrations always have the real CSS default
+  const origRunMigrations = store._runMigrations.bind(store)
+  store._runMigrations = async function (migrations) {
+    await cssReady
+    return origRunMigrations(migrations)
+  }
+
+  // Ensure getAll / _getAll have the real CSS default
+  const orig_getAll = store._getAll.bind(store)
+  store._getAll = async function () {
+    await cssReady
+    return orig_getAll()
+  }
+
+  return store
 }
 
-export const OptionsStore = await MDHROptionsStore()
+export const OptionsStore = MDHROptionsStore()
 export default OptionsStore
