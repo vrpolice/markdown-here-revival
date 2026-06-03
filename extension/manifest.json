@@ -3,7 +3,8 @@
   "name": "__MSG_app_name__",
   "version": "4.0.15",
   "description": "__MSG_app_slogan__",
-  "homepage_url": "https://gitlab.com/jfx2006/markdown-here-revival",
+  "author": "vrpolice",
+  "homepage_url": "https://github.com/vrpolice/markdown-here-revival",
   "browser_specific_settings": {
     "gecko": {
       "id": "markdown-here-revival@xul.calypsoblue.org",
