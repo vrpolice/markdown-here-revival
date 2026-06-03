@@ -174,7 +174,21 @@ async function editorMutationCb(mutationList, observer) {
   if (previewHidden) {
     return
   }
-  if (mutationList.type === "attributes" && mutationList.target.nodeName !== "IMG") {
+  // mutationList is an array of MutationRecord; skip pure-attribute
+  // mutations (e.g. style recalc during window/splitter resize) unless
+  // they are on IMG elements.
+  const hasContentChange = mutationList.some((record) => {
+    if (record.type === "characterData") return true
+    if (record.type === "childList"
+        && (record.addedNodes.length > 0 || record.removedNodes.length > 0)) {
+      return true
+    }
+    if (record.type === "attributes" && record.target.nodeName === "IMG") {
+      return true
+    }
+    return false
+  })
+  if (!hasContentChange) {
     return
   }
   return debouncedRenderPreview()
