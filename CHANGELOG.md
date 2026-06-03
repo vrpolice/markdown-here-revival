@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.0.15]
+
+### Changed
+- Overhaul default email CSS for a clean, professional business style:
+  refined typography with system font stack, lighter heading borders,
+  GitHub-style code blocks, subtle zebra-striped tables with header
+  background, and softer blockquote styling
+
 ## [4.0.14]
 
 ### Fixed
