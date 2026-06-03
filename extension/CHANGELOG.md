@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.0.16]
+
+### Fixed
+- Options page "Basic CSS" was empty due to missing CHANGELOG.md in extension
+  bundle causing a NetworkError that aborted page initialization
+- Added error handling to changelog loader so a fetch failure does not block
+  the rest of the options page
+
+### Changed
+- Updated authorship and homepage URL to this fork
+- LICENSE now includes all three generations of copyright holders
+
 ## [4.0.15]
 
 ### Changed
