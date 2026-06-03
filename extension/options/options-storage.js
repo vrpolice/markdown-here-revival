@@ -74,13 +74,9 @@ export function MDHROptionsMigrate() {
   return MDHROptionsStore()
 }
 
-function MDHROptionsStore() {
-  let main_css_default_p = fetchExtFile("/default.css")
-  let DEFAULTS = Object.assign({}, kOptDefaults)
-
-  main_css_default_p.then(async function (value) {
-    DEFAULTS["main-css"] = value
-  })
+async function MDHROptionsStore() {
+  let main_css_default = await fetchExtFile("/default.css")
+  let DEFAULTS = Object.assign({}, kOptDefaults, { "main-css": main_css_default })
 
   return new OptionsSync({
     defaults: DEFAULTS,
@@ -89,5 +85,5 @@ function MDHROptionsStore() {
   })
 }
 
-export const OptionsStore = MDHROptionsStore()
+export const OptionsStore = await MDHROptionsStore()
 export default OptionsStore
