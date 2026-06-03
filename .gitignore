@@ -5,3 +5,4 @@ __pycache__/
 .mdhr_test_profiles/
 .claude/
 CLAUDE.md
+AGENTS.md

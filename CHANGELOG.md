@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.0.14]
+
+### Fixed
+- Splitter divider line between Markdown editor and preview pane was invisible
+  in Thunderbird 151 ESR due to missing `--splitter-color` CSS variable
+- Default preview panel width is now centered (50% of window) instead of
+  fixed 650px, calculated fresh per compose window
+- "Reset Preview" now correctly resets splitter to centered position
+
 ## [4.0.13]
 
 ### Changed
