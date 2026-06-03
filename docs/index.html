@@ -248,20 +248,38 @@
       font-family: var(--font-mono); font-size: 0.85rem;
       color: var(--fg); background: var(--code-bg);
     }
-    .demo-pane .rendered {
-      font-family: var(--font);
-    }
-    .demo-pane .rendered h1, .demo-pane .rendered h2 { margin: 12px 0 6px; }
-    .demo-pane .rendered h1 { font-size: 1.3rem; }
-    .demo-pane .rendered h2 { font-size: 1.1rem; }
+    /* Rendered output styles — mirrors extension/default.css */
+    .demo-pane .rendered { font-family: var(--font); }
+    .demo-pane .rendered p { margin: 0 0 1.2em 0; }
+    .demo-pane .rendered h1, .demo-pane .rendered h2, .demo-pane .rendered h3 { margin: 1.3em 0 0.6em; padding: 0; font-weight: bold; }
+    .demo-pane .rendered h1 { font-size: 1.4em; border-bottom: 2px solid #777; }
+    .demo-pane .rendered h2 { font-size: 1.25em; border-bottom: 1px solid #777; }
+    .demo-pane .rendered h3 { font-size: 1.15em; }
     .demo-pane .rendered code {
-      background: var(--code-bg); padding: 2px 6px;
-      border-radius: 4px; font-size: 0.85em;
+      font-family: Consolas, Inconsolata, Courier, monospace;
+      margin: 0 0.15em; padding: 0 0.3em;
+      font-weight: 550; font-size: 0.9em;
+      background-color: rgba(175,184,193,0.2);
+      border-radius: 3px;
+    }
+    .demo-pane .rendered pre { margin: 1.2em 0; }
+    .demo-pane .rendered pre code {
+      display: block; border: 1px solid #CCC;
+      padding: 0.5em 0.7em; border-radius: 3px;
+      white-space: pre; overflow: auto;
     }
     .demo-pane .rendered blockquote {
-      border-left: 3px solid var(--accent); padding-left: 12px;
-      color: var(--muted); margin: 8px 0;
+      margin: 1.2em 0; padding: 0 1em;
+      color: #777; border-inline-start: 2px solid rgb(114,159,207);
     }
+    .demo-pane .rendered ul, .demo-pane .rendered ol { margin: 1.2em 0; padding-left: 2em; }
+    .demo-pane .rendered li { margin: 0.5em 0; }
+    .demo-pane .rendered ul ul, .demo-pane .rendered ul ol, .demo-pane .rendered ol ul, .demo-pane .rendered ol ol { margin: 0; padding-left: 1em; }
+    .demo-pane .rendered table { margin: 1.2em 0; padding: 0; border-collapse: collapse; border-spacing: 0; font-size: 1em; border: 0; width: 100%; }
+    .demo-pane .rendered table tr { border: 0; border-top: 1px solid #777; margin: 0; padding: 0; }
+    .demo-pane .rendered table tr:nth-child(2n) { background-color: rgba(119,119,119,.25); }
+    .demo-pane .rendered table tr th, .demo-pane .rendered table tr td { font-size: 1em; border: 1px solid #777; margin: 0; padding: 0.5em 1em; }
+    .demo-pane .rendered table tr th { font-weight: bold; }
 
     /* ===== Install ===== */
     .install-steps {
@@ -483,7 +501,7 @@ See details at `#457` and `#462`.</pre>
             <li>Updated onboarding docs</li>
           </ul>
           <h2>📊 Metrics</h2>
-          <table style="width:100%;border-collapse:collapse;">
+          <table>
             <thead><tr><th>Metric</th><th>Before</th><th>After</th></tr></thead>
             <tbody>
               <tr><td>Errors</td><td>2.1%</td><td>0.4%</td></tr>
