@@ -9,6 +9,8 @@ GFM tables, syntax highlighting, LaTeX math, emoji autocomplete, and a live prev
 ---
 
 > **A note from the maintainer:** I've long sought an elegant way to write well-formatted emails. I've tried many email clients over the years, and the Markdown Here Revival plugin for Thunderbird is by far the most satisfying solution I've found. Unfortunately, the original developer is no longer maintaining it. To keep it working on newer Thunderbird versions, I made minimal compatibility fixes with the help of AI. This is a stopgap — I very much hope that a developer with similar needs will pick this up and maintain it more professionally. If that's you, please reach out or just fork the project.
+>
+> **Disclaimer:** This is an independent fork, maintained separately from the upstream project. Bug reports and feature requests should be directed to this fork's [issue tracker](../../issues), not to the original authors. The upstream maintainers are not responsible for any changes or issues introduced here. If the original authors have concerns, they are welcome to [reach out](../../issues).
 
 ---
 
