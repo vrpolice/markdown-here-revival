@@ -212,15 +212,13 @@ messenger.menus.onClicked.addListener(async (info, tab) => {
 })
 
 async function resetModernMode(preview = true, width = true) {
-  const savedPreviewWidth = (await OptionsStore.get("saved-preview-width"))["saved-preview-width"]
   const saved = await saveComposed()
   await unInjectMDPreview()
   await OptionsStore.set({
     "mdhr-mode": "modern",
     "enable-markdown-mode": "true",
-    "preview-width": savedPreviewWidth,
+    "preview-width": 0,
   })
-  //await OptionsStore.reset("preview-width")
   await injectMDPreview()
   await restoreComposed(saved)
 }

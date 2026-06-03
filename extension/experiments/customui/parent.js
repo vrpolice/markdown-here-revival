@@ -291,9 +291,14 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
       const previewCol = frame.parentElement;
       const wrapper = previewCol.parentElement;
       const editorCol = wrapper.firstChild;
+      const getDefaultWidth = () => {
+        const win = previewCol.ownerDocument.defaultView;
+        return Math.floor(win.innerWidth / 2);
+      };
+      const initWidth = (options.width > 0) ? options.width : getDefaultWidth();
       previewCol.style.display = options.hidden ? "none" : "inline";
-      previewCol.style.width = (options.width || 650) + "px";
-      previewCol.setAttribute("width", (options.width || 650));
+      previewCol.style.width = initWidth + "px";
+      previewCol.setAttribute("width", initWidth);
       frame.style.height = "100%";
       frame.style.width = "100%";
       frame.style.display = "block";
@@ -320,9 +325,10 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
         }
         if (typeof lOptions.width === "number") {
           if (mode === "modern") {
-            previewCol.style.width = lOptions.width + "px";
-            previewCol.setAttribute("width", lOptions.width);
-            frame.setCustomUIContextProperty("width", lOptions.width);
+            const lWidth = (lOptions.width > 0) ? lOptions.width : getDefaultWidth();
+            previewCol.style.width = lWidth + "px";
+            previewCol.setAttribute("width", lWidth);
+            frame.setCustomUIContextProperty("width", lWidth);
           }
         }
       });
@@ -350,7 +356,7 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
         const splitter = document.createXULElement("splitter");
         splitter.style["border-inline-end-width"] = "0";
         splitter.style["border-inline-start"] =
-            "1px solid var(--splitter-color)";
+            "1px solid var(--splitter-color, color-mix(in srgb, currentColor 15%, transparent))";
         splitter.style["min-width"] = "0";
         splitter.style["width"] = "5px";
         splitter.style["background-color"] = "transparent";
