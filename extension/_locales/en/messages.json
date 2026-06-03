@@ -269,8 +269,8 @@
     "message": "Report bugs"
   },
   "options_page__create_gitlab_issue": {
-    "message": "Create new issue on GitLab",
-    "description": "Text linking to Gitlab issue creation page"
+    "message": "Create new issue on GitHub",
+    "description": "Text linking to issue creation page"
   },
   "options_page__issue_debug_info": {
     "message": "The following debug info can be used:",

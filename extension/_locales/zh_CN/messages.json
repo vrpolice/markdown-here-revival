@@ -326,7 +326,7 @@
     "hash": "9f1ec9f89229e160f8f9dd23cc4f9709"
   },
   "options_page__create_gitlab_issue": {
-    "message": "在 GitLab 上创建新版本",
+    "message": "在 GitHub 上创建新版本",
     "description": "Text linking to Gitlab issue creation page",
     "hash": "43410ee226a64717592bd271c54ac2e0"
   },
