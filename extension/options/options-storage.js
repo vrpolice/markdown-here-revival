@@ -97,11 +97,25 @@ function MDHROptionsStore() {
     return origRunMigrations(migrations)
   }
 
-  // Ensure getAll / _getAll have the real CSS default
+  // Ensure _getAll / _get have the real CSS default, even if storage
+  // already contains an empty "main-css" from a prior broken install.
+  const fixEmptyCSS = (result) => {
+    if (!result["main-css"] || result["main-css"].trim() === "") {
+      result["main-css"] = DEFAULTS["main-css"]
+    }
+    return result
+  }
+
   const orig_getAll = store._getAll.bind(store)
   store._getAll = async function () {
     await cssReady
-    return orig_getAll()
+    return fixEmptyCSS(await orig_getAll())
+  }
+
+  const orig_get = store._get.bind(store)
+  store._get = async function (keys) {
+    await cssReady
+    return fixEmptyCSS(await orig_get(keys))
   }
 
   return store
