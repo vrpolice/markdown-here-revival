@@ -262,10 +262,14 @@ import OptionsStore from "./options-storage.js"
 
   async function loadChangeList() {
     const changesElem = document.getElementById("mdhrChangeList")
-    const changes = await fetchExtFile("/CHANGELOG.md")
-
-    const response = await markdownRender(changes)
-    changesElem.innerHTML = escapeHTML`${response}`
+    try {
+      const changes = await fetchExtFile("/CHANGELOG.md")
+      const response = await markdownRender(changes)
+      changesElem.innerHTML = escapeHTML`${response}`
+    } catch (ex) {
+      console.warn("Failed to load changelog:", ex)
+      changesElem.textContent = "(Changelog unavailable)"
+    }
   }
 
   /**
