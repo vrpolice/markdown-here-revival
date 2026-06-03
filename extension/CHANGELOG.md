@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.0.17]
+
+### Fixed
+- Preview pane now maintains its width ratio when the compose window is resized
+- Signature content no longer flickers when dragging the splitter left
+  (MutationObserver was treating the record array as a single object, so
+  attribute-change filtering never worked)
+
+### Changed
+- Extension ID changed to `markdown-here-revival@vrpolice.github.io` to
+  avoid conflict with the upstream ATN listing
+- Options page branding updated: footer credits, bug report link, license
+  summary all point to this fork
+- Author displays as plain text (no hyperlink) in Add-ons Manager
+
 ## [4.0.16]
 
 ### Fixed
