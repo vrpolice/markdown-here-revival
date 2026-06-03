@@ -291,17 +291,42 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
       const previewCol = frame.parentElement;
       const wrapper = previewCol.parentElement;
       const editorCol = wrapper.firstChild;
-      const getDefaultWidth = () => {
-        const win = previewCol.ownerDocument.defaultView;
-        return Math.floor(win.innerWidth / 2);
-      };
+      const win = previewCol.ownerDocument.defaultView;
+      const getDefaultWidth = () => Math.floor(win.innerWidth / 2);
       const initWidth = (options.width > 0) ? options.width : getDefaultWidth();
+
+      // Track the split ratio so the preview pane maintains its proportion
+      // when the compose window is resized.
+      let previewRatio = win.innerWidth > 0 ? initWidth / win.innerWidth : 0.5;
+
       previewCol.style.display = options.hidden ? "none" : "inline";
       previewCol.style.width = initWidth + "px";
       previewCol.setAttribute("width", initWidth);
       frame.style.height = "100%";
       frame.style.width = "100%";
       frame.style.display = "block";
+
+      // Reapply the saved ratio when the compose window is resized
+      const onWindowResize = () => {
+        if (previewCol.style.display === "none") return;
+        const newWidth = Math.round(win.innerWidth * previewRatio);
+        previewCol.style.width = newWidth + "px";
+        previewCol.setAttribute("width", newWidth);
+        frame.setCustomUIContextProperty("width", newWidth);
+      };
+      win.addEventListener("resize", onWindowResize);
+
+      // Update the ratio when the user drags the splitter
+      const splitter = previewCol.previousElementSibling;
+      if (splitter && splitter.tagName === "splitter") {
+        splitter.addEventListener("command", () => {
+          const curWidth = previewCol.clientWidth;
+          if (curWidth > 0 && win.innerWidth > 0) {
+            previewRatio = curWidth / win.innerWidth;
+          }
+        });
+      }
+
       frame.addCustomUILocalOptionsListener(lOptions => {
         const mode = frame.getAttribute("data-mode")
         if (typeof lOptions.mode === "string") {
@@ -329,6 +354,9 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
             previewCol.style.width = lWidth + "px";
             previewCol.setAttribute("width", lWidth);
             frame.setCustomUIContextProperty("width", lWidth);
+            if (win.innerWidth > 0) {
+              previewRatio = lWidth / win.innerWidth;
+            }
           }
         }
       });
