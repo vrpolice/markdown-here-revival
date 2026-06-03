@@ -75,50 +75,18 @@ export function MDHROptionsMigrate() {
 }
 
 function MDHROptionsStore() {
+  let main_css_default_p = fetchExtFile("/default.css")
   let DEFAULTS = Object.assign({}, kOptDefaults)
 
-  // Start fetching the default CSS immediately. We patch _runMigrations and
-  // _getAll below to wait for it, preventing the race where an empty
-  // "main-css" default is stored before the fetch completes.
-  const cssReady = fetchExtFile("/default.css").then((css) => {
-    DEFAULTS["main-css"] = css
+  main_css_default_p.then(async function (value) {
+    DEFAULTS["main-css"] = value
   })
 
-  const store = new OptionsSync({
+  return new OptionsSync({
     defaults: DEFAULTS,
     migrations: MIGRATIONS,
     logging: false,
   })
-
-  // Ensure migrations always have the real CSS default
-  const origRunMigrations = store._runMigrations.bind(store)
-  store._runMigrations = async function (migrations) {
-    await cssReady
-    return origRunMigrations(migrations)
-  }
-
-  // Ensure _getAll / _get have the real CSS default, even if storage
-  // already contains an empty "main-css" from a prior broken install.
-  const fixEmptyCSS = (result) => {
-    if (!result["main-css"] || result["main-css"].trim() === "") {
-      result["main-css"] = DEFAULTS["main-css"]
-    }
-    return result
-  }
-
-  const orig_getAll = store._getAll.bind(store)
-  store._getAll = async function () {
-    await cssReady
-    return fixEmptyCSS(await orig_getAll())
-  }
-
-  const orig_get = store._get.bind(store)
-  store._get = async function (keys) {
-    await cssReady
-    return fixEmptyCSS(await orig_get(keys))
-  }
-
-  return store
 }
 
 export const OptionsStore = MDHROptionsStore()
