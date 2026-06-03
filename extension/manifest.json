@@ -4,6 +4,10 @@
   "version": "4.0.16",
   "description": "__MSG_app_slogan__",
   "author": "vrpolice",
+  "developer": {
+    "name": "vrpolice",
+    "url": "https://github.com/vrpolice/markdown-here-revival"
+  },
   "homepage_url": "https://github.com/vrpolice/markdown-here-revival",
   "browser_specific_settings": {
     "gecko": {
