@@ -1,5 +1,46 @@
 # Changelog
 
+## [4.0.18]
+
+### English
+
+#### Fixed
+- Cancel sending and show a retry notification when Markdown rendering times
+  out, fails, or returns empty content, preventing accidental delivery of raw
+  Markdown
+- Pass numeric compose window IDs when switching between classic and modern
+  modes
+- Normalize legacy string booleans and current boolean settings consistently
+- Match notification responses by both window and notification ID, with
+  complete listener cleanup
+- Restore legacy option migration and preserve existing user customizations
+- Remove CustomUI resize and splitter listeners when preview panels close
+
+#### Changed
+- Reduce the privileged CustomUI experiment to the compose-preview features
+  used by this extension
+- Add portable unit tests, lint configuration, and GitHub Actions CI
+- Remove the unused `accountsRead` permission
+- Redesign the project website with a real Thunderbird preview screenshot and
+  complete English and Chinese pages
+
+### 中文
+
+#### 修复
+- Markdown 渲染超时、异常或返回空内容时取消发送并显示重试通知，避免误发
+  未渲染的 Markdown 原文
+- 切换经典/现代模式时传递正确的数字写信窗口 ID
+- 统一处理旧版字符串布尔值与当前布尔设置
+- 同时按窗口 ID 和通知 ID 匹配通知响应，并完整清理事件监听器
+- 恢复旧设置迁移，同时保留用户已有的自定义配置
+- 关闭预览面板时移除 CustomUI 的窗口缩放与分隔条监听器
+
+#### 改进
+- 精简 CustomUI 特权代码，仅保留扩展实际使用的写信预览功能
+- 增加可移植单元测试、代码检查配置和 GitHub Actions CI
+- 移除未使用的 `accountsRead` 权限
+- 重做项目网页，加入真实 Thunderbird 预览截图，并提供完整中英文页面
+
 ## [4.0.17]
 
 ### Fixed
