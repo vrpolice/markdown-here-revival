@@ -1,6 +1,5 @@
 var ex_customui = class extends ExtensionCommon.ExtensionAPI {
   getAPI(context) {
-    const Cc = Components.classes;
     const { ExtensionParent } = ChromeUtils.importESModule(
       "resource://gre/modules/ExtensionParent.sys.mjs"
     );
@@ -239,9 +238,18 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
       };
       let localOptions = {};
       const optionsListeners = [];
+      const cleanupListeners = [];
       result.addCustomUILocalOptionsListener = function(listener) {
         optionsListeners.push(listener);
         listener(localOptions);
+      };
+      result.addCustomUICleanupListener = function(listener) {
+        cleanupListeners.push(listener);
+      };
+      result.runCustomUICleanup = function() {
+        for (const listener of cleanupListeners.splice(0)) {
+          listener();
+        }
       };
       result.messageManager.addMessageListener("ex:customui:setLocalOptions", {
         receiveMessage(message) {
@@ -266,24 +274,9 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
         return null;
       }
       const result = frame.parentNode;
+      frame.runCustomUICleanup();
       result.removeChild(frame);
       return result;
-    };
-
-    // Enables dynamic height and fixed 100% width for a WebExtension frame
-    const setWebextFrameSizesForVerticalBox = function(frame, options) {
-      frame.width = "100%";
-      frame.height = (options.height || 100) + "px";
-      frame.style.display = options.hidden ? "none" : "block";
-      frame.addCustomUILocalOptionsListener(lOptions => {
-        if (typeof lOptions.height === "number") {
-          frame.height = lOptions.height + "px";
-          frame.style.height = frame.height;
-        }
-        if (typeof lOptions.hidden === "boolean") {
-          frame.style.display = lOptions.hidden ? "none" : "block";
-        }
-      });
     };
 
     // Sets sensible sizes for an editor sidebar frame
@@ -318,14 +311,19 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
 
       // Update the ratio when the user drags the splitter
       const splitter = previewCol.previousElementSibling;
+      const onSplitterCommand = () => {
+        const curWidth = previewCol.clientWidth;
+        if (curWidth > 0 && win.innerWidth > 0) {
+          previewRatio = curWidth / win.innerWidth;
+        }
+      };
       if (splitter && splitter.tagName === "splitter") {
-        splitter.addEventListener("command", () => {
-          const curWidth = previewCol.clientWidth;
-          if (curWidth > 0 && win.innerWidth > 0) {
-            previewRatio = curWidth / win.innerWidth;
-          }
-        });
+        splitter.addEventListener("command", onSplitterCommand);
       }
+      frame.addCustomUICleanupListener(() => {
+        win.removeEventListener("resize", onWindowResize);
+        splitter?.removeEventListener("command", onSplitterCommand);
+      });
 
       frame.addCustomUILocalOptionsListener(lOptions => {
         const mode = frame.getAttribute("data-mode")
@@ -465,206 +463,6 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
         return handler;
       }
 
-      // Address Book ---------------------------------------------------------
-      locationHandlers.addressbook = makeLocationHandler({
-        injectIntoWindow(window, url, options) {
-          if (window.location.toString()
-              !== "chrome://messenger/content/addressbook/addressbook.xhtml") {
-            return; // incompatible window
-          }
-          const sidebar = window.document.getElementById("dirTreeBox");
-          const frame = insertWebextFrame("addressbook", url, sidebar);
-          setWebextFrameSizesForVerticalBox(frame, options);
-        },
-        uninjectFromWindow(window, url) {
-          removeWebextFrame("addressbook", url, window.document);
-        }
-      });
-
-      // Contact editing ------------------------------------------------------
-      const cardWindowLocations = [
-        "chrome://messenger/content/addressbook/abNewCardDialog.xhtml",
-        "chrome://messenger/content/addressbook/abEditCardDialog.xhtml"
-      ];
-      for (let [suffix, tabId] of [
-          ["", "abOtherTab"],
-          ["_home", "abHomeTab"],
-          ["_work", "abBusinessTab"]]) {
-        const locationName = "addressbook_contact_edit" + suffix;
-        locationHandlers[locationName] = makeLocationHandler({
-          injectIntoWindow(window, url, options) {
-            const dialogType = cardWindowLocations.indexOf(
-                window.location.toString()); // 0 for new, 1 for editing
-            if (dialogType < 0) {
-              return; // incompatible window
-            }
-            const tab = window.document.getElementById(tabId);
-            const frame = insertWebextFrame(locationName, url, tab);
-            setWebextFrameSizesForVerticalBox(frame, options);
-
-            // Hook up the 'id' and 'parentid' context properties
-            if (dialogType === 1) { // editing existing card
-              frame.setCustomUIContextProperty("id", window.gEditCard
-                  && window.gEditCard.card ? window.gEditCard.card.UID : null);
-              const containingDir = window.gEditCard && window.gEditCard.abURI
-                  ? window.getContainingDirectory() : null;
-              frame.setCustomUIContextProperty("parentid", containingDir
-                  ? containingDir.UID : null);
-              const origGetCardValues = window.GetCardValues;
-              window.GetCardValues = function(card, document) {
-                if (window.document.contains(frame) && card
-                    && document === window.document) {
-                  try {
-                    frame.setCustomUIContextProperty("id", card.UID);
-                    frame.setCustomUIContextProperty("parentid",
-                        window.getContainingDirectory().UID);
-                  } catch (e) {
-                    // Never block the original implementation, just log issues
-                    console.error(e);
-                  }
-                }
-                return origGetCardValues.apply(this, arguments);
-              }
-            } else { // creating new card
-              frame.setCustomUIContextProperty("id", null);
-              const abPopup = window.document.getElementById("abPopup");
-              const getDirUID = () => {
-                const value = abPopup ? abPopup.value : null;
-                return value ? window.GetDirectoryFromURI(value).UID : null;
-              };
-              frame.setCustomUIContextProperty("parentid", getDirUID());
-              // abPopup is not necessarily initialized yet, workaround:
-              window.setTimeout(() => {
-                frame.setCustomUIContextProperty("parentid", getDirUID());
-              }, 0);
-              if (abPopup) {
-                abPopup.addEventListener("command", () => {
-                  if (window.document.contains(frame)) {
-                    frame.setCustomUIContextProperty("parentid", getDirUID());
-                  }
-                });
-              } else {
-                console.warn("New contact window missing abPopup");
-              }
-            }
-
-            // Hook up the 'apply' event, permitting WebExtensions to alter
-            // properties on the card before saving.
-            const origCheckAndSetCardValues = window.CheckAndSetCardValues;
-            window.CheckAndSetCardValues = function(card, doc, check) {
-              const result = origCheckAndSetCardValues.apply(this, arguments);
-              if (window.document.contains(frame) && window.document === doc
-                  && card) {
-                let props = {};
-                for (let prop of card.properties) {
-                  props[prop.name] = prop.value;
-                }
-                // Temporarily disable the dialog, while we asynchronously
-                // do our event thing. As we're hooking into a synchronous API,
-                // we will block until the method ends by repeatedly yielding
-                // to other tasks (which keeps the UI responsive).
-                const dialog = window.document.getElementById("abcardDialog");
-                const origVisibility = dialog.style.visibility;
-                dialog.style.visibility = "hidden";
-                let done = false;
-                let error = null;
-                let newProps = null;
-                fireWebextFrameEvent(frame, "apply", props, true).then(
-                    p => newProps = p).catch(e => error = e).finally(
-                    () => done = true);
-                const thread = Cc["@mozilla.org/thread-manager;1"].getService()
-                    .currentThread;
-                while (!done) {
-                  thread.processNextEvent(true);
-                }
-                dialog.style.visibility = origVisibility;
-                if (error !== null) {
-                  throw error;
-                }
-                if (newProps) {
-                  for (let prop of Object.keys(newProps)) {
-                    // note: if this experiment should get migrated to the core,
-                    // it might be reasonable to apply a blacklist here for
-                    // consistency with the contacts API (preventing changes of
-                    // internal properties).
-                    card.setProperty(prop, newProps[prop]);
-                  }
-                }
-              }
-              return result;
-            };
-          },
-          uninjectFromWindow(window, url) {
-            removeWebextFrame(locationName, url, window.document);
-            // Contact editing windows don't live long, so cleanup of our
-            // injections is not really necessary (as they become transparent
-            // once the frame is gone).
-          }
-        });
-      }
-
-      // Calendar -------------------------------------------------------------
-      locationHandlers.calendar = makeLocationHandler({
-        injectIntoWindow(window, url, options) {
-          if (window.location.toString()
-              !== "chrome://messenger/content/messenger.xhtml") {
-            return; // incompatible window
-          }
-          const sidebar = window.document.getElementById("calSidebar") // TB 91+
-              || window.document.getElementById("ltnSidebar"); // earlier
-          const frame = insertWebextFrame("calendar", url, sidebar);
-          setWebextFrameSizesForVerticalBox(frame, options);
-        },
-        uninjectFromWindow(window, url) {
-          removeWebextFrame("calendar", url, window.document);
-        }
-      });
-
-      // Calendar editing -----------------------------------------------------
-      const itemIframeURLs = [
-        "chrome://calendar/content/calendar-item-iframe.xhtml", // TB 91+
-        "chrome://lightning/content/lightning-item-iframe.xhtml" // earlier
-      ];
-      locationHandlers.calendar_event_edit = makeLocationHandler({
-        injectIntoWindow(window, url, options) {
-          if (itemIframeURLs.indexOf(window.location.toString()) < 0) {
-            return; // incompatible window
-          }
-          const calendarItem = window.arguments[0].calendarEvent;
-          if (!((calendarItem.isEvent && calendarItem.isEvent()) // TB 87+
-                || window.cal.item.isEvent(calendarItem) // earlier
-              )) {
-            return; // item iframe for a non-event item, also incompatible
-          }
-          const tabBox = window.document.getElementById("event-grid-tab-vbox");
-          const frame = insertWebextFrame("calendar_event_edit", url,
-              tabBox.parentElement, tabBox);
-          setWebextFrameSizesForVerticalBox(frame, options);
-
-          frame.setCustomUIContextProperty("id", calendarItem.id);
-          frame.setCustomUIContextProperty("parentid",
-              calendarItem.calendar.id);
-        },
-        uninjectFromWindow(window, url) {
-          removeWebextFrame("calendar_event_edit", url, window.document);
-        }
-      });
-
-      // Message composition --------------------------------------------------
-      locationHandlers.compose = makeLocationHandler({
-        injectIntoWindow(window, url, options) {
-          if (window.location.toString() !== "chrome://messenger/content/"
-              + "messengercompose/messengercompose.xhtml") {
-            return; // incompatible window
-          }
-          insertSidebarWebextFrame("compose", url, window.document,
-              "composeContentBox");
-        },
-        uninjectFromWindow(window, url) {
-          removeSidebarWebextFrame("compose", url, window.document);
-        }
-      });
-
       // A "sidebar" that's more closely tied to the editor part of the compose window
       locationHandlers.compose_editor = makeLocationHandler({
         injectIntoWindow(window, url, options) {
@@ -712,47 +510,11 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
           const editor_elem = window.document.getElementById("messageEditor");
           const editor_wrapper = window.document.getElementById("customui-editor-wrapper");
           removeSidebarWebextFrame("compose_editor", url, window.document);
+          if (!editor_elem || !editor_wrapper) {
+            return;
+          }
           editor_wrapper.insertAdjacentElement("beforebegin", editor_elem);
           editor_wrapper.remove();
-        }
-      });
-
-      // Messaging ------------------------------------------------------------
-      locationHandlers.messaging = makeLocationHandler({
-        injectIntoWindow(window, url, options) {
-          if (window.location.toString() !== "chrome://messenger/content/"
-              + "messenger.xhtml") {
-            return; // incompatible window
-          }
-          insertSidebarWebextFrame("messaging", url, window.document,
-              "messengerBox");
-        },
-        uninjectFromWindow(window, url) {
-          removeSidebarWebextFrame("messaging", url, window.document);
-        }
-      });
-
-      // Dialog when opening files with unknown content type ------------------
-      locationHandlers.unknown_file_action = makeLocationHandler({
-        injectIntoWindow(window, url, options) {
-          if (window.location.toString() !== "chrome://mozapps/content/"
-              + "downloads/unknownContentType.xhtml") {
-            return; // incompatible window
-          }
-          const container = window.document.getElementById("container");
-          const frame = insertWebextFrame("unknown_file_action", url,
-              container);
-          setWebextFrameSizesForVerticalBox(frame, options);
-
-          frame.setCustomUIContextProperty("url",
-              window.dialog.mLauncher.source.spec);
-          frame.setCustomUIContextProperty("type",
-              window.dialog.mLauncher.MIMEInfo.MIMEType);
-          frame.setCustomUIContextProperty("filename",
-              window.dialog.mLauncher.suggestedFileName);
-        },
-        uninjectFromWindow(window, url) {
-          removeWebextFrame("unknown_file_action", url, window.document);
         }
       });
     }

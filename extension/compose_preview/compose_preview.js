@@ -5,7 +5,14 @@
  */
 
 import DOMPurify from "../vendor/purify.es.mjs"
-import { debounce, fetchExtFile, getMainCSS, getSyntaxCSS, toInt } from "../async_utils.mjs"
+import {
+  debounce,
+  fetchExtFile,
+  getMainCSS,
+  getSyntaxCSS,
+  toInt,
+} from "../async_utils.mjs"
+import { normalizeBoolean } from "../background-helpers.mjs"
 import OptionsStore from "../options/options-storage.js"
 import { CSSInliner } from "./css-inliner.js"
 import { MdhrMangle } from "../mdhr-mangle.js"
@@ -107,7 +114,9 @@ async function renderMDEmail(msg_html) {
   doc = parseHTMLFromString(escapeHTML`${doc}`)
   doc = wrapExternal(doc)
   if (!contentDiv) {
-    contentDiv = p_iframe.contentDocument.body.querySelector("body > div.markdown-here-wrapper")
+    contentDiv = p_iframe.contentDocument.body.querySelector(
+      "body > div.markdown-here-wrapper",
+    )
   }
   contentDiv.replaceChildren(...doc.body.childNodes)
   return true
@@ -158,9 +167,12 @@ async function setClassicMode() {
 }
 
 async function setModernMode() {
-  const savedState = await OptionsStore.get(["preview-width", "enable-markdown-mode"])
+  const savedState = await OptionsStore.get([
+    "preview-width",
+    "enable-markdown-mode",
+  ])
   const preview_width = toInt(savedState["preview-width"])
-  const hidden = !savedState["enable-markdown-mode"]
+  const hidden = !normalizeBoolean(savedState["enable-markdown-mode"])
   await messenger.ex_customui.setLocalOptions({
     mode: "modern",
     width: preview_width,
@@ -251,7 +263,9 @@ async function previewFrameLoaded(e) {
   p_iframe.contentWindow.onclick = function (e) {
     e.preventDefault()
   }
-  contentDiv = p_iframe.contentDocument.body.querySelector("body > div.markdown-here-wrapper")
+  contentDiv = p_iframe.contentDocument.body.querySelector(
+    "body > div.markdown-here-wrapper",
+  )
   const context = await messenger.ex_customui.getContext()
   const mdhr_mode = (await OptionsStore.get("mdhr-mode"))["mdhr-mode"]
   if (mdhr_mode === "modern") {
@@ -261,7 +275,10 @@ async function previewFrameLoaded(e) {
   }
   const tabId = await getTabIdFromWinId(context.windowId)
   if (tabId) {
-    const hidden = !(await OptionsStore.get("enable-markdown-mode"))["enable-markdown-mode"]
+    const enabled = (await OptionsStore.get("enable-markdown-mode"))[
+      "enable-markdown-mode"
+    ]
+    const hidden = !normalizeBoolean(enabled)
     await sendPreviewStateToCompose(tabId, hidden)
   }
 
@@ -303,8 +320,14 @@ async function loadIFrame() {
   const syntax_css = await getSyntaxCSS()
   const html = await fetchExtFile("/compose_preview/preview_iframe.html")
   const srcdoc = html
-    .replace("<!-- @SYNTAX_CSS@ -->", `<style id="MDHR_syntax_css">${syntax_css}</style>`)
-    .replace("<!-- @MAIN_CSS@ -->", `<style id="MDHR_main_css">${main_css}</style>`)
+    .replace(
+      "<!-- @SYNTAX_CSS@ -->",
+      `<style id="MDHR_syntax_css">${syntax_css}</style>`,
+    )
+    .replace(
+      "<!-- @MAIN_CSS@ -->",
+      `<style id="MDHR_main_css">${main_css}</style>`,
+    )
   const doc = parseHTMLFromString(srcdoc)
   p_iframe.srcdoc = `<!DOCTYPE html>\n${doc.documentElement.outerHTML}`
 }
@@ -320,70 +343,72 @@ async function loadIFrame() {
 })()
 await resetMarked()
 
-messenger.runtime.onMessage.addListener(function (request, sender, responseCallback) {
-  if (
-    (typeof sender.tab === "undefined" ||
-      typeof sender.tab.id === "undefined" ||
-      sender.tab.id < 0) &&
-    request.windowId === undefined
-  ) {
-    return false
-  }
-  if (!request.action) {
-    return false
-  }
-  if (!request.action.startsWith("cp.")) {
-    return false
-  }
-  return messenger.ex_customui.getContext().then((context) => {
-    if (context.windowType !== "messageCompose") {
+messenger.runtime.onMessage.addListener(
+  function (request, sender, responseCallback) {
+    if (
+      (typeof sender.tab === "undefined" ||
+        typeof sender.tab.id === "undefined" ||
+        sender.tab.id < 0) &&
+      request.windowId === undefined
+    ) {
       return false
     }
-    switch (request.action) {
-      case "cp.render-preview":
-        if (sender.tab.windowId !== context.windowId) {
-          return false
-        }
-        return renderMDEmail(request.doc_html)
-      case "cp.renderer-reset":
-        return resetMarked()
-      case "cp.toggle-preview":
-        if (request.windowId !== context.windowId) {
-          return false
-        }
-        return togglePreview(request.windowId)
-      case "cp.disableForPlainText":
-        if (request.windowId !== context.windowId) {
-          return false
-        }
-        return disableForPlainText(request.windowId)
-      case "cp.get-content":
-        if (request.windowId !== context.windowId) {
-          return false
-        }
-        return getMsgContent()
-      case "cp.scroll-to":
-        if (sender.tab.windowId !== context.windowId) {
-          return false
-        }
-        return scrollTo(request.payload)
-      case "cp.toggle-classic-preview":
-        if (request.windowId !== context.windowId) {
-          return false
-        }
-        return toggleClassicPreview()
-      case "cp.set-classic-mode":
-        if (request.windowId !== context.windowId) {
-          return false
-        }
-        return setClassicMode()
-      case "cp.set-modern-mode":
-        if (request.windowId !== context.windowId) {
-          return false
-        }
-        return setModernMode()
-      default:
-        console.log(`Compose Preview: invalid action: ${request.action}`)
+    if (!request.action) {
+      return false
     }
-  })
-})
+    if (!request.action.startsWith("cp.")) {
+      return false
+    }
+    return messenger.ex_customui.getContext().then((context) => {
+      if (context.windowType !== "messageCompose") {
+        return false
+      }
+      switch (request.action) {
+        case "cp.render-preview":
+          if (sender.tab.windowId !== context.windowId) {
+            return false
+          }
+          return renderMDEmail(request.doc_html)
+        case "cp.renderer-reset":
+          return resetMarked()
+        case "cp.toggle-preview":
+          if (request.windowId !== context.windowId) {
+            return false
+          }
+          return togglePreview(request.windowId)
+        case "cp.disableForPlainText":
+          if (request.windowId !== context.windowId) {
+            return false
+          }
+          return disableForPlainText(request.windowId)
+        case "cp.get-content":
+          if (request.windowId !== context.windowId) {
+            return false
+          }
+          return getMsgContent()
+        case "cp.scroll-to":
+          if (sender.tab.windowId !== context.windowId) {
+            return false
+          }
+          return scrollTo(request.payload)
+        case "cp.toggle-classic-preview":
+          if (request.windowId !== context.windowId) {
+            return false
+          }
+          return toggleClassicPreview()
+        case "cp.set-classic-mode":
+          if (request.windowId !== context.windowId) {
+            return false
+          }
+          return setClassicMode()
+        case "cp.set-modern-mode":
+          if (request.windowId !== context.windowId) {
+            return false
+          }
+          return setModernMode()
+        default:
+          console.log(`Compose Preview: invalid action: ${request.action}`)
+      }
+    })
+  },
+)

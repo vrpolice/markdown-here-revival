@@ -4,5 +4,6 @@ __pycache__/
 *.pyc
 .mdhr_test_profiles/
 .claude/
+.superpowers/
 CLAUDE.md
 AGENTS.md

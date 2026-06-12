@@ -4,6 +4,7 @@
  */
 
 import { getHljsStyles, sha256Digest } from "../async_utils.mjs"
+import { collectLegacyOptionChanges } from "./options-migration-helpers.mjs"
 // Sha256 Checksums for old versions of default.css
 const OLD_CSS_SUMS = [
   // Test checksum
@@ -28,13 +29,16 @@ const OLD_CSS_SUMS = [
 
 // Checksum of the current version of default.css
 // 4.0.15 (professional business style)
-const DEFAULT_CSS_SUM = "da24c3d2c7f476579cd47c48fad152b1b3a5407b17906af4c0bfacc09e5eb55c"
+const DEFAULT_CSS_SUM =
+  "da24c3d2c7f476579cd47c48fad152b1b3a5407b17906af4c0bfacc09e5eb55c"
 
 export function testCssSum(checksum) {
   // Checks the default.css checksum to ensure the above are correct
   // First verify it's not in OLD_CSS_SUMS
   if (OLD_CSS_SUMS.includes(checksum)) {
-    throw new Error(`default.css checksum ${checksum} is in OLD_CSS_SUMS when it should not be!`)
+    throw new Error(
+      `default.css checksum ${checksum} is in OLD_CSS_SUMS when it should not be!`,
+    )
   }
   if (checksum !== DEFAULT_CSS_SUM) {
     throw new Error(
@@ -84,26 +88,14 @@ export async function migrate_oldHotKey(options, defaults) {
 }
 
 export async function migrate_oldOptions(options, defaults) {
-  const bool_options = ["math-enabled", "gfm-line-breaks-enabled"]
-  const string_options = ["main-css", "math-value"]
-  const old_option_keys = Array.prototype.concat(bool_options, string_options)
-  let old_options = await EXT_STORAGE.get(old_option_keys)
-  for (let b_opt of bool_options) {
-    // Sometimes booleans turned to strings, which makes testing truthiness annoying
-    if (typeof old_options[b_opt] === "string") {
-      old_options[b_opt] = Boolean(old_options[b_opt] === "true")
-    }
-  }
-  let changed_options = {}
-  for (let opt of old_option_keys) {
-    if (options[opt] !== defaults[opt]) {
-      changed_options[opt] = old_options[opt]
-    }
-  }
-  if (changed_options.length > 0) {
-    return changed_options
-  }
-  return null
+  const oldOptionKeys = [
+    "math-enabled",
+    "gfm-line-breaks-enabled",
+    "main-css",
+    "math-value",
+  ]
+  const oldOptions = await EXT_STORAGE.get(oldOptionKeys)
+  return collectLegacyOptionChanges(options, defaults, oldOptions)
 }
 
 export async function migrate_syntaxCSS(options, defaults) {
@@ -111,7 +103,9 @@ export async function migrate_syntaxCSS(options, defaults) {
   const syntax_values = Object.values(syntax_css_available)
   const syntax_css = options["syntax-css"]
   if (syntax_values.indexOf(syntax_css) === -1) {
-    console.log(`Invalid Highlightjs CSS detected. Resetting to ${defaults["syntax-css"]}`)
+    console.log(
+      `Invalid Highlightjs CSS detected. Resetting to ${defaults["syntax-css"]}`,
+    )
     return { "syntax-css": defaults["syntax-css"] }
   }
   return null
@@ -186,9 +180,15 @@ export async function migrate_mathRenderer(options, defaults) {
 }
 export async function migrate_mathRenderer2(options, defaults) {
   if (options["math-renderer"] === "disabled") {
-    return { "math-renderer-enabled": false, "math-renderer": defaults["math-renderer"] }
+    return {
+      "math-renderer-enabled": false,
+      "math-renderer": defaults["math-renderer"],
+    }
   } else if (options["math-renderer"] === "enabled") {
-    return { "math-renderer-enabled": true, "math-renderer": options["math-renderer"] }
+    return {
+      "math-renderer-enabled": true,
+      "math-renderer": options["math-renderer"],
+    }
   }
   return null
 }

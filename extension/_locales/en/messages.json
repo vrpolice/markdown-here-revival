@@ -49,6 +49,10 @@
     "message": "Send",
     "description": "Text on the Send (continue) button of the prompt that's shown when it's detected that a user may have forgotten to render the Markdown in their email"
   },
+  "render_failed_prompt": {
+    "message": "Markdown rendering failed. The message was not sent. Return to the composer and try again.",
+    "description": "Error shown when the rendered message cannot be obtained before sending"
+  },
   "set_math_api_url": {
     "message": "Set an API URL for Math rendering in Settings.",
     "description": "A message displayed when math rendering is set to use Gchart but an invalid URL is set."

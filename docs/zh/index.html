@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Markdown Here Revival — Thunderbird Markdown 邮件扩展</title>
+  <meta name="description" content="在 Thunderbird 中使用 Markdown 撰写邮件、实时预览，并发送整洁美观的 HTML 邮件。">
+  <meta name="theme-color" content="#1373d1">
+  <link rel="icon" type="image/svg+xml" href="../images/md_fucsia.svg">
+  <link rel="stylesheet" href="../site.css">
+  <link rel="alternate" hreflang="en" href="../">
+  <link rel="alternate" hreflang="zh-CN" href="./">
+  <link rel="alternate" hreflang="x-default" href="../">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <nav class="site-nav" aria-label="主导航">
+    <div class="shell nav-inner">
+      <a class="brand" href="#" aria-label="Markdown Here Revival 中文首页">
+        <img src="../images/md_fucsia.svg" alt="">
+        <span>Markdown Here Revival</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">功能</a>
+        <a href="#install">安装</a>
+        <a href="#about">关于</a>
+        <a class="language-link" href="../" lang="en">English</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <header class="hero">
+      <div class="shell hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Thunderbird 的 Markdown 写作工具</p>
+          <h1>自然书写。<br><em>漂亮发送。</em></h1>
+          <p class="hero-lede">直接用 Markdown 撰写邮件，在草稿旁实时查看效果，无需离开 Thunderbird 即可发送精美的 HTML 邮件。</p>
+          <div class="actions">
+            <a class="button button-primary" href="https://github.com/vrpolice/markdown-here-revival/releases/latest">下载最新版 .xpi</a>
+            <a class="button button-secondary" href="https://github.com/vrpolice/markdown-here-revival">在 GitHub 查看源码</a>
+          </div>
+          <ul class="hero-facts" aria-label="项目亮点">
+            <li><strong>128–151</strong><span>Thunderbird 支持</span></li>
+            <li><strong>13</strong><span>种界面语言</span></li>
+            <li><strong>MIT</strong><span>开源许可证</span></li>
+          </ul>
+        </div>
+        <div class="hero-mark" aria-hidden="true">
+          <span class="mark-bracket">[</span>
+          <img src="../images/md_fucsia.svg" alt="">
+          <span class="mark-bracket">]</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="product-proof" aria-labelledby="demo-title">
+      <div class="shell">
+        <figure class="demo-figure">
+          <div class="window-bar" aria-hidden="true">
+            <span></span><span></span><span></span>
+            <b>Thunderbird 写信窗口</b>
+          </div>
+          <div class="demo-crop">
+            <img src="../demo/demo.png" width="3386" height="1850" alt="Markdown Here Revival 在 Thunderbird 中的实时预览">
+          </div>
+          <figcaption>
+            <div>
+              <p class="eyebrow">实时预览</p>
+              <h2 id="demo-title">Thunderbird 中的 Markdown 实时预览</h2>
+            </div>
+            <p>编写 Markdown 时即可在草稿旁查看渲染后的邮件，支持中英文内容、链接、引用、列表与代码高亮。</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section features-section" id="features">
+      <div class="shell">
+        <div class="section-intro">
+          <p class="eyebrow">专注邮件写作流程</p>
+          <h2>该有的都有。<br>写信时没有多余干扰。</h2>
+          <p>Markdown Here Revival 直接融入 Thunderbird 写信窗口，将熟悉的 Markdown 转换成适合邮件发送的 HTML。</p>
+        </div>
+        <div class="feature-layout">
+          <article class="feature feature-large">
+            <span class="feature-index">01</span>
+            <h3>边写边预览</h3>
+            <p>可调整大小的分栏预览会随草稿更新，标题、列表、引用、表格和链接的效果始终一目了然。</p>
+          </article>
+          <article class="feature">
+            <span class="feature-index">02</span>
+            <h3>清晰易读的代码</h3>
+            <p>支持 100 多种语言和 90 多款高亮主题，让技术邮件中的代码保持清晰。</p>
+          </article>
+          <article class="feature">
+            <span class="feature-index">03</span>
+            <h3>数学公式、表格与 Emoji</h3>
+            <p>无需离开编辑器，即可使用 LaTeX 公式、GFM 表格和 Emoji 自动补全。</p>
+          </article>
+          <article class="feature feature-wide">
+            <span class="feature-index">04</span>
+            <h3>不仅为了预览，更为了可靠发送</h3>
+            <p>发送前会净化 HTML；原始 Markdown 可以保留在已发送邮件中，方便再次编辑；点击发送时自动完成渲染。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section workflow-section" id="how-it-works">
+      <div class="shell workflow-grid">
+        <div class="section-intro compact">
+          <p class="eyebrow">工作方式</p>
+          <h2>三步把纯文本变成精美邮件。</h2>
+        </div>
+        <ol class="workflow">
+          <li><span>1</span><div><h3>撰写</h3><p>使用你已经熟悉的 Markdown 语法写信。</p></div></li>
+          <li><span>2</span><div><h3>预览</h3><p>在旁边的面板中实时检查渲染效果。</p></div></li>
+          <li><span>3</span><div><h3>发送</h3><p>扩展会安全地将草稿替换为带样式的 HTML。</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section install-section" id="install">
+      <div class="shell install-grid">
+        <div class="section-intro compact">
+          <p class="eyebrow">手动安装</p>
+          <h2>不到一分钟即可开始使用。</h2>
+          <p>在项目进入 Thunderbird 扩展商店之前，Markdown Here Revival 以 XPI 文件形式发布。</p>
+          <a class="text-link" href="https://github.com/vrpolice/markdown-here-revival/releases/latest">打开最新版本 →</a>
+        </div>
+        <ol class="install-list">
+          <li><b>01</b><p>从 Releases 下载 <code>markdown-here-revival.xpi</code>。</p></li>
+          <li><b>02</b><p>打开 Thunderbird 附加组件管理器，选择“从文件安装附加组件…”。</p></li>
+          <li><b>03</b><p>打开写信窗口，点击工具栏上的 <strong>M↓</strong>，或按下 <code>Ctrl+Alt+M</code>。</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section history-section" id="about">
+      <div class="shell">
+        <div class="section-intro">
+          <p class="eyebrow">项目传承</p>
+          <h2>十余年的 Markdown 邮件实践。</h2>
+        </div>
+        <div class="timeline">
+          <article><time>2012–2019</time><h3>最初版本</h3><p>Adam Pritchard 为浏览器和 Thunderbird 创建了 Markdown Here。</p></article>
+          <article><time>2021–2025</time><h3>现代重生</h3><p>Rob Lemley 基于现代 Thunderbird MailExtensions API 重新实现了扩展。</p></article>
+          <article><time>2026–至今</time><h3>持续维护</h3><p>本分支持续跟进新 ESR 版本，并改善 Thunderbird 中的邮件撰写体验。</p></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-grid">
+      <div><strong>Markdown Here Revival</strong><p>用 Markdown 书写，用更好的形式发送。</p></div>
+      <div class="footer-links">
+        <a href="https://github.com/vrpolice/markdown-here-revival">GitHub</a>
+        <a href="https://github.com/vrpolice/markdown-here-revival/releases">版本发布</a>
+        <a href="https://github.com/vrpolice/markdown-here-revival/issues">问题反馈</a>
+        <a href="https://gitlab.com/jfx2006/markdown-here-revival">上游项目</a>
+      </div>
+      <p class="legal">MIT © Adam Pritchard、Rob Lemley、vrpolice<br>图标：MPL-2.0 © Gregory K.</p>
+    </div>
+  </footer>
+</body>
+</html>

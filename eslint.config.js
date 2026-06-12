@@ -22,7 +22,6 @@ export default [
     "CI/**",
     "requirements/**",
     "mailext-options-sync/**",
-    "test/**",
     "venv/**",
   ]),
   globalIgnores([
@@ -59,7 +58,13 @@ export default [
     ...css.configs.recommended,
   },
   {
-    files: ["*.js", "extension/**/*.js", "extension/**/*.mjs", "tools/**/*js"],
+    files: [
+      "*.js",
+      "extension/**/*.js",
+      "extension/**/*.mjs",
+      "test/**/*.mjs",
+      "tools/**/*js",
+    ],
     ...js.configs.recommended,
     //tseslint.configs.recommended,
     ...noUnsanitized.configs.recommended,
@@ -125,4 +130,9 @@ export default [
     },
   },
   eslintPluginPrettierRecommended,
+  {
+    rules: {
+      "prettier/prettier": ["error", { semi: false }],
+    },
+  },
 ]

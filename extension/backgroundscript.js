@@ -8,6 +8,12 @@
  * Mail Extension background script.
  */
 import { getMessage, sha256Digest, toInt } from "./async_utils.mjs"
+import {
+  normalizeBoolean,
+  prepareBeforeSend,
+  sendModeToComposeWindows,
+  waitForNotificationResponse,
+} from "./background-helpers.mjs"
 import OptionsStore from "./options/options-storage.js"
 import { getShortcutStruct } from "./options/shortcuts.js"
 
@@ -19,10 +25,12 @@ messenger.runtime.onInstalled.addListener(async (details) => {
   const APP_NAME = getMessage("app_name")
   function updateCallback(winId, url) {
     const message = getMessage("upgrade_notification_text", APP_NAME)
-    openNotification(winId, message, messenger.notificationbar.PRIORITY_INFO_MEDIUM, [
-      getMessage("update_notes_button"),
-      getMessage("cancel_button"),
-    ]).then((rv) => {
+    openNotification(
+      winId,
+      message,
+      messenger.notificationbar.PRIORITY_INFO_MEDIUM,
+      [getMessage("update_notes_button"), getMessage("cancel_button")],
+    ).then((rv) => {
       if (rv === "ok") {
         messenger.tabs.create({
           url: url.href,
@@ -65,81 +73,87 @@ messenger.runtime.onInstalled.addListener(async (details) => {
 
 // Handle rendering requests from the content script.
 // See the comment in markdown-render.js for why we do this.
-messenger.runtime.onMessage.addListener(function (request, sender, responseCallback) {
-  // The content script can load in a not-real tab (like the search box), which
-  // has an invalid `sender.tab` value. We should just ignore these pages.
-  if (typeof sender.tab?.id === "undefined" || sender.tab.id < 0) {
-    return false
-  }
-  if (!request.action && request.popupCloseMode) {
-    return false
-  }
-  // Ignore messages for compose-preview pane
-  if (request.action.startsWith("cp.")) {
-    return false
-  } else if (request.action === "get-options") {
-    OptionsStore.getAll().then((prefs) => {
-      responseCallback(prefs)
-    })
-    return true
-  } else if (request.action === "get-option") {
-    return getOptionValue(request.key)
-  } else if (request.action === "fetch-emojis") {
-    return fetchEmojis()
-  } else if (request.action === "set-composeaction-purple") {
-    messenger.composeAction.setIcon({
-      path: {
-        16: "images/md_fucsia.svg",
-        19: "images/md_fucsia.svg",
-        32: "images/md_fucsia.svg",
-        38: "images/md_fucsia.svg",
-        64: "images/md_fucsia.svg",
-      },
-      tabId: sender.tab.id,
-    })
-    return false
-  } else if (request.action === "set-composeaction-bw") {
-    messenger.composeAction.setIcon({
-      path: {
-        16: "images/md_bw.svg",
-        19: "images/md_bw.svg",
-        32: "images/md_bw.svg",
-        38: "images/md_bw.svg",
-        64: "images/md_bw.svg",
-      },
-      tabId: sender.tab.id,
-    })
-    return false
-  } else if (request.action === "open-tab") {
-    messenger.tabs.create({
-      url: request.url,
-    })
-    return false
-  } else if (request.action === "test-request") {
-    responseCallback("test-request-good")
-    return false
-  } else if (request.action === "test-bg-request") {
-    if (request.argument) {
-      return Promise.resolve(["test-bg-request", "test-bg-request-ok", request.argument])
+messenger.runtime.onMessage.addListener(
+  function (request, sender, responseCallback) {
+    // The content script can load in a not-real tab (like the search box), which
+    // has an invalid `sender.tab` value. We should just ignore these pages.
+    if (typeof sender.tab?.id === "undefined" || sender.tab.id < 0) {
+      return false
     }
-    return Promise.resolve(["test-bg-request", "test-bg-request-ok"])
-  } else if (request.action === "update-hotkey") {
-    return updateHotKey(request.hotkey_value, request.hotkey_tooltip)
-  } else if (request.action === "compose-data") {
-    return getComposeData(sender.tab)
-  } else if (request.action === "sha256") {
-    return sha256Digest(request.data)
-  } else if (request.action === "mdhr-mode-set") {
-    if (request.mode && request.mode === "classic") {
-      return setClassicMode(request.hidden)
-    } else if (request.mode && request.mode === "modern") {
-      return setModernMode(request.hidden)
+    if (!request.action && request.popupCloseMode) {
+      return false
     }
-  } else {
-    console.log("unmatched request action", request.action)
-    throw "unmatched request action: " + request.action
-  }
-})
+    // Ignore messages for compose-preview pane
+    if (request.action.startsWith("cp.")) {
+      return false
+    } else if (request.action === "get-options") {
+      OptionsStore.getAll().then((prefs) => {
+        responseCallback(prefs)
+      })
+      return true
+    } else if (request.action === "get-option") {
+      return getOptionValue(request.key)
+    } else if (request.action === "fetch-emojis") {
+      return fetchEmojis()
+    } else if (request.action === "set-composeaction-purple") {
+      messenger.composeAction.setIcon({
+        path: {
+          16: "images/md_fucsia.svg",
+          19: "images/md_fucsia.svg",
+          32: "images/md_fucsia.svg",
+          38: "images/md_fucsia.svg",
+          64: "images/md_fucsia.svg",
+        },
+        tabId: sender.tab.id,
+      })
+      return false
+    } else if (request.action === "set-composeaction-bw") {
+      messenger.composeAction.setIcon({
+        path: {
+          16: "images/md_bw.svg",
+          19: "images/md_bw.svg",
+          32: "images/md_bw.svg",
+          38: "images/md_bw.svg",
+          64: "images/md_bw.svg",
+        },
+        tabId: sender.tab.id,
+      })
+      return false
+    } else if (request.action === "open-tab") {
+      messenger.tabs.create({
+        url: request.url,
+      })
+      return false
+    } else if (request.action === "test-request") {
+      responseCallback("test-request-good")
+      return false
+    } else if (request.action === "test-bg-request") {
+      if (request.argument) {
+        return Promise.resolve([
+          "test-bg-request",
+          "test-bg-request-ok",
+          request.argument,
+        ])
+      }
+      return Promise.resolve(["test-bg-request", "test-bg-request-ok"])
+    } else if (request.action === "update-hotkey") {
+      return updateHotKey(request.hotkey_value, request.hotkey_tooltip)
+    } else if (request.action === "compose-data") {
+      return getComposeData(sender.tab)
+    } else if (request.action === "sha256") {
+      return sha256Digest(request.data)
+    } else if (request.action === "mdhr-mode-set") {
+      if (request.mode && request.mode === "classic") {
+        return setClassicMode(request.hidden)
+      } else if (request.mode && request.mode === "modern") {
+        return setModernMode(request.hidden)
+      }
+    } else {
+      console.log("unmatched request action", request.action)
+      throw "unmatched request action: " + request.action
+    }
+  },
+)
 
 async function getOptionValue(key) {
   const valueObj = await OptionsStore.get(key)
@@ -216,7 +230,7 @@ async function resetModernMode(preview = true, width = true) {
   await unInjectMDPreview()
   await OptionsStore.set({
     "mdhr-mode": "modern",
-    "enable-markdown-mode": "true",
+    "enable-markdown-mode": true,
     "preview-width": 0,
   })
   await injectMDPreview()
@@ -235,7 +249,10 @@ messenger.composeScripts.register({
 })
 
 async function getOpenComposeWindows() {
-  return await messenger.windows.getAll({ populate: true, windowTypes: ["messageCompose"] })
+  return await messenger.windows.getAll({
+    populate: true,
+    windowTypes: ["messageCompose"],
+  })
 }
 
 messenger.commands.onCommand.addListener(async function (command) {
@@ -252,70 +269,78 @@ messenger.commands.onCommand.addListener(async function (command) {
 function withTimeout(promise, ms, label) {
   return Promise.race([
     promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error(`Timeout: ${label} (${ms}ms)`)), ms)),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`Timeout: ${label} (${ms}ms)`)), ms),
+    ),
   ])
 }
 
 messenger.compose.onBeforeSend.addListener(async function (tab, details) {
-  // If this is a plain text message, do not check for markdown-like content
-  if (details.isPlainText) {
-    return {}
+  const reportRenderFailure = async (error) => {
+    console.error("Markdown Here Revival: onBeforeSend error:", error)
+    const message =
+      getMessage("render_failed_prompt") ||
+      "Markdown rendering failed. The message was not sent. Return to the composer and try again."
+    await openNotification(
+      tab.windowId,
+      message,
+      messenger.notificationbar.PRIORITY_CRITICAL_HIGH,
+      [
+        getMessage("forgot_to_render_back_button") || "Return to composer",
+        getMessage("cancel_button") || "Dismiss",
+      ],
+    )
   }
-  try {
-    const savedState = await OptionsStore.get([
-      "forgot-to-render-check-enabled",
-      "enable-markdown-mode",
-    ])
-    const markdownEnabled = savedState["enable-markdown-mode"]
-    const forgotToRenderCheckEnabled = savedState["forgot-to-render-check-enabled"]
-    if (!markdownEnabled && forgotToRenderCheckEnabled) {
-      const isMarkdown = await withTimeout(
+  return prepareBeforeSend({
+    details,
+    loadOptions: async () => {
+      const savedState = await OptionsStore.get([
+        "forgot-to-render-check-enabled",
+        "enable-markdown-mode",
+      ])
+      return {
+        markdownEnabled: savedState["enable-markdown-mode"],
+        forgotToRenderCheckEnabled:
+          savedState["forgot-to-render-check-enabled"],
+      }
+    },
+    checkForMarkdown: () =>
+      withTimeout(
         messenger.tabs.sendMessage(tab.id, { action: "check-forgot-render" }),
         5000,
         "check-forgot-render",
+      ),
+    confirmUnrenderedSend: async () => {
+      const message = `${getMessage("forgot_to_render_prompt_info")}
+        ${getMessage("forgot_to_render_prompt_question")}`
+      const response = await openNotification(
+        tab.windowId,
+        message,
+        messenger.notificationbar.PRIORITY_CRITICAL_HIGH,
+        [
+          getMessage("forgot_to_render_send_button"),
+          getMessage("forgot_to_render_back_button"),
+        ],
       )
-      if (isMarkdown) {
-        const message = `${getMessage("forgot_to_render_prompt_info")}
-          ${getMessage("forgot_to_render_prompt_question")}`
-        const rv = await openNotification(
-          tab.windowId,
-          message,
-          messenger.notificationbar.PRIORITY_CRITICAL_HIGH,
-          [getMessage("forgot_to_render_send_button"), getMessage("forgot_to_render_back_button")],
-        )
-        if (rv !== "ok") {
-          return { cancel: true } // Markdown disabled and is markdown content
-        }
-      }
-      return {} // Markdown disabled and not markdown content
-    }
-    const previewHidden = savedState["enable-markdown-mode"] === "false"
-    if (previewHidden) {
-      return {}
-    }
-    const msgHTML = await withTimeout(
-      messenger.runtime.sendMessage({
-        action: "cp.get-content",
-        windowId: tab.windowId,
-      }),
-      5000,
-      "cp.get-content",
-    )
-    if (!msgHTML) {
-      console.warn("Markdown Here Revival: No content from preview, sending original message")
-      return {}
-    }
-    const finalDetails = { body: msgHTML }
-    await withTimeout(
-      messenger.runtime.sendMessage({ action: "disable-mutation-listener" }),
-      2000,
-      "disable-mutation-listener",
-    ).catch(() => {}) // non-critical, ignore timeout
-    return { cancel: false, details: finalDetails }
-  } catch (e) {
-    console.error("Markdown Here Revival: onBeforeSend error:", e)
-    return {} // Allow send to proceed without modifications
-  }
+      return response === "ok"
+    },
+    getRenderedContent: () =>
+      withTimeout(
+        messenger.runtime.sendMessage({
+          action: "cp.get-content",
+          windowId: tab.windowId,
+        }),
+        5000,
+        "cp.get-content",
+      ),
+    disableMutationListener: () =>
+      withTimeout(
+        messenger.runtime.sendMessage({ action: "disable-mutation-listener" }),
+        2000,
+        "disable-mutation-listener",
+      ),
+    reportRenderFailure,
+  })
 })
 
 messenger.tabs.onCreated.addListener(async function (tab) {
@@ -331,15 +356,24 @@ messenger.tabs.onCreated.addListener(async function (tab) {
   }
 })
 
-messenger.reply_prefs.onFormatChanged.addListener(async (name, useParagraphPref) => {
-  await updateBodyTextOptionFromSettings(useParagraphPref)
-})
+messenger.reply_prefs.onFormatChanged.addListener(
+  async (name, useParagraphPref) => {
+    await updateBodyTextOptionFromSettings(useParagraphPref)
+  },
+)
 
 async function updateBodyTextOptionFromSettings(useParagraphPref) {
-  const useBodyTextOpt = (await OptionsStore.get("use-bodytext-enabled"))["use-bodytext-enabled"]
-  if (typeof useParagraphPref === "boolean" && typeof useBodyTextOpt === "boolean") {
+  const useBodyTextOpt = (await OptionsStore.get("use-bodytext-enabled"))[
+    "use-bodytext-enabled"
+  ]
+  if (
+    typeof useParagraphPref === "boolean" &&
+    typeof useBodyTextOpt === "boolean"
+  ) {
     if (useParagraphPref === useBodyTextOpt) {
-      return await OptionsStore.set({ "use-bodytext-enabled": !useParagraphPref })
+      return await OptionsStore.set({
+        "use-bodytext-enabled": !useParagraphPref,
+      })
     }
   } else {
     throw new Error(
@@ -438,35 +472,7 @@ async function toggleMDPreview(windowId) {
 }
 
 async function openNotification(windowId, message, priority, button_labels) {
-  async function notificationClose(notificationId) {
-    return new Promise((resolve) => {
-      let notificationResponse = "cancel"
-
-      // Defining a onClosed listener
-      function onClosedListener(closeWinId, closeNotificationId, closedByUser) {
-        if (closeWinId === windowId) {
-          messenger.notificationbar.onClosed.removeListener(onClosedListener)
-          messenger.notificationbar.onButtonClicked.removeListener(onButtonClickListener)
-          resolve(notificationResponse)
-        }
-      }
-
-      function onButtonClickListener(closeWinId, closeNotificationId, buttonId) {
-        if (closeWinId === windowId) {
-          if (buttonId === "btn-ok") {
-            notificationResponse = "ok"
-          }
-          resolve(notificationResponse)
-        }
-      }
-
-      messenger.notificationbar.onDismissed.addListener(onClosedListener)
-      messenger.notificationbar.onClosed.addListener(onClosedListener)
-      messenger.notificationbar.onButtonClicked.addListener(onButtonClickListener)
-    })
-  }
-
-  let notificationId = await messenger.notificationbar.create({
+  const notificationId = await messenger.notificationbar.create({
     windowId: windowId,
     priority: priority,
     label: message,
@@ -482,7 +488,13 @@ async function openNotification(windowId, message, priority, button_labels) {
     ],
     placement: "bottom",
   })
-  return await notificationClose(notificationId)
+  return waitForNotificationResponse({
+    windowId,
+    notificationId,
+    onButtonClicked: messenger.notificationbar.onButtonClicked,
+    onClosed: messenger.notificationbar.onClosed,
+    onDismissed: messenger.notificationbar.onDismissed,
+  })
 }
 
 async function updateHotKey(rendered = null) {
@@ -526,14 +538,15 @@ async function updateHotKey(rendered = null) {
 }
 
 async function setClassicMode(hidden = true) {
-  const previewWidth = (await OptionsStore.get("preview-width"))["preview-width"]
+  const previewWidth = (await OptionsStore.get("preview-width"))[
+    "preview-width"
+  ]
   await OptionsStore.set({ "saved-preview-width": previewWidth })
   const wins = await getOpenComposeWindows()
   for (const win of wins) {
-    await messenger.runtime.sendMessage({
-      action: "cp.set-classic-mode",
-      windowId: win,
-    })
+    await sendModeToComposeWindows([win], "cp.set-classic-mode", (message) =>
+      messenger.runtime.sendMessage(message),
+    )
     await messenger.composeAction.setIcon({
       path: {
         16: ICON_INACTIVE,
@@ -550,14 +563,15 @@ async function setClassicMode(hidden = true) {
 }
 
 async function setModernMode(hidden = false) {
-  const savedPreviewWidth = (await OptionsStore.get("saved-preview-width"))["saved-preview-width"]
+  const savedPreviewWidth = (await OptionsStore.get("saved-preview-width"))[
+    "saved-preview-width"
+  ]
   await OptionsStore.set({ "preview-width": savedPreviewWidth })
   const wins = await getOpenComposeWindows()
   for (const win of wins) {
-    await messenger.runtime.sendMessage({
-      action: "cp.set-modern-mode",
-      windowId: win,
-    })
+    await sendModeToComposeWindows([win], "cp.set-modern-mode", (message) =>
+      messenger.runtime.sendMessage(message),
+    )
     await messenger.composeAction.setIcon({
       path: {
         16: ICON_RENDERED,
@@ -594,7 +608,9 @@ async function saveComposed() {
   let win
   for (win of wins) {
     const tabId = win.tabs[0].id
-    const savedMsgHdrs = await messenger.compose.saveMessage(tabId, { mode: "draft" })
+    const savedMsgHdrs = await messenger.compose.saveMessage(tabId, {
+      mode: "draft",
+    })
     /*const details = {
       id: win.id,
       tabId: tabId,
@@ -631,7 +647,7 @@ async function injectMDPreview() {
     } catch (e) {
       options["width"] = toInt(savedState["saved-preview-width"])
     }
-    options["hidden"] = savedState["enable-markdown-mode"] === "false"
+    options["hidden"] = !normalizeBoolean(savedState["enable-markdown-mode"])
   } else {
     options["hidden"] = true
   }
@@ -658,7 +674,9 @@ async function unInjectMDPreview() {
 async function doStartup() {
   const savedState = await OptionsStore.get(["mdhr-mode", "preview-width"])
   if (savedState["mdhr-mode"] === "modern") {
-    await OptionsStore.set({ "saved-preview-width": savedState["preview-width"] })
+    await OptionsStore.set({
+      "saved-preview-width": savedState["preview-width"],
+    })
   }
   await updateHotKey()
   await injectMDPreview()
