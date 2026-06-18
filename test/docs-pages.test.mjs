@@ -5,11 +5,15 @@ import test from "node:test"
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8")
 
 test("English and Chinese landing pages share the bilingual site contract", async () => {
-  const [english, chinese, css] = await Promise.all([
+  const [english, chinese, css, manifest, readme, readmeZh] = await Promise.all([
     read("docs/index.html"),
     read("docs/zh/index.html"),
     read("docs/site.css"),
+    read("extension/manifest.json"),
+    read("README.md"),
+    read("README.zh-CN.md"),
   ])
+  const manifestJson = JSON.parse(manifest)
 
   assert.match(english, /<html lang="en">/)
   assert.match(chinese, /<html lang="zh-CN">/)
@@ -25,4 +29,12 @@ test("English and Chinese landing pages share the bilingual site contract", asyn
   assert.match(chinese, /href="\.\.\/site\.css"/)
   assert.match(css, /prefers-reduced-motion/)
   assert.doesNotMatch(css, /linear-gradient\([^)]*#d946ef/)
+  assert.equal(
+    manifestJson.browser_specific_settings.gecko.strict_max_version,
+    "152.*",
+  )
+  assert.match(english, /128–152/)
+  assert.match(chinese, /128–152/)
+  assert.match(readme, /Thunderbird 152/)
+  assert.match(readmeZh, /Thunderbird 152/)
 })

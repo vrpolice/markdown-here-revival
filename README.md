@@ -1,4 +1,4 @@
-# <img src="extension/images/md_fucsia.svg" alt="MDHR Logo" height="24" width="24" align="bottom"> Markdown Here Revival — Thunderbird 151+ Edition
+# <img src="extension/images/md_fucsia.svg" alt="MDHR Logo" height="24" width="24" align="bottom"> Markdown Here Revival — Thunderbird 128–152 Edition
 
 > :cn: [中文版本 (Chinese)](README.zh-CN.md)
 
@@ -35,9 +35,9 @@ Versions 4.0.0 through 4.0.12 supported Thunderbird 128–150.
 
 ### 3rd Gen: This Project (2026–)
 
-Thunderbird 151 shipped in May 2026 as a new ESR release (rebased on Firefox 151). The upstream project's `strict_max_version` was capped at `150.*`, preventing installation on Thunderbird 151 and newer.
+Thunderbird 152 shipped in June 2026 as the next release after Thunderbird 151. The upstream project's `strict_max_version` was capped at `150.*`, preventing installation on Thunderbird 151 and newer.
 
-This fork updates the extension compatibility for **Thunderbird 151 ESR and above**, keeping the tool alive for those who depend on it.
+This fork updates the extension compatibility for **Thunderbird 151 and 152**, keeping the tool alive for those who depend on it.
 
 ---
 
@@ -45,7 +45,8 @@ This fork updates the extension compatibility for **Thunderbird 151 ESR and abov
 
 | Extension version | Thunderbird version |
 |-------------------|---------------------|
-| 4.0.13+ | **151.0+** |
+| 4.0.19+ | **128.0 – 152.\*** |
+| 4.0.13 – 4.0.18 | 128.0 – 151.* |
 | 4.0.0 – 4.0.12 | 128.0 – 150.* |
 
 *Thunderbird only. Browser-based email (Gmail, Outlook, Yahoo Mail) is not supported.*
