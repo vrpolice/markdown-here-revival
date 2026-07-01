@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.0.20]
+
+### Fixed
+- Fix unreadable live preview text when Thunderbird is using a dark theme by
+  forcing the preview iframe to use a light message canvas with dark text.
+  Thanks to @mirenradia for reporting this in
+  https://github.com/vrpolice/markdown-here-revival/issues/1.
+
+### 中文
+- 修复 Thunderbird 深色主题下实时预览文字不可读的问题：预览 iframe 现在
+  固定使用浅色邮件画布与深色文字。感谢 @mirenradia 在
+  https://github.com/vrpolice/markdown-here-revival/issues/1 中反馈。
+
 ## [4.0.19]
 
 ### Changed
