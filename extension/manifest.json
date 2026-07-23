@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "__MSG_app_name__",
-  "version": "4.0.20",
+  "version": "4.0.21",
   "description": "__MSG_app_slogan__",
   "author": "vrpolice",
   "homepage_url": "https://github.com/vrpolice/markdown-here-revival",
@@ -9,7 +9,7 @@
     "gecko": {
       "id": "markdown-here-revival@vrpolice.github.io",
       "strict_min_version": "128.0",
-      "strict_max_version": "152.*"
+      "strict_max_version": "153.*"
     }
   },
   "default_locale": "en",

@@ -16,35 +16,33 @@
   <script src="../vendor/bootstrap.bundle.js"></script>
   <script src="options.js" type="module"></script>
 </head>
-<body class="pt-3 pb-5">
+<body class="settings-page">
 
-<div class="container-fluid">
+<div class="container-fluid settings-shell">
   <div class="row">
-    <nav class="nav flex-column col-md-3 col-lg-2 nav-pills text-uppercase sidebar">
-      <a class="justify-content-center nav-link text-light" id="docs-tab"  data-bs-toggle="pill" data-bs-target="#docs" aria-controls="docs"
+    <nav class="nav flex-column col-md-3 col-lg-2 nav-pills sidebar" role="tablist" aria-label="Settings sections">
+      <a class="nav-link" id="docs-tab" href="#docs" role="tab" data-bs-toggle="pill" data-bs-target="#docs" aria-controls="docs"
          aria-selected="false">
         <span data-i18n="howto">Howto</span></a>
-      <a class="justify-content-center nav-link text-light active" id="options-tab"  data-bs-toggle="pill" data-bs-target="#options" aria-controls="home"
+      <a class="nav-link active" id="options-tab" href="#options" role="tab" data-bs-toggle="pill" data-bs-target="#options" aria-controls="options"
          aria-selected="true">
         <span data-i18n="options_title">Options</span></a>
-      <a class="justify-content-center nav-link text-light" id="theme-tab" data-bs-target="#theme"  data-bs-toggle="pill" aria-controls="theme"
+      <a class="nav-link" id="theme-tab" href="#theme" role="tab" data-bs-target="#theme" data-bs-toggle="pill" aria-controls="theme"
          aria-selected="false">
         <span data-i18n="syntax_highlighting_theme_label">Theme</span></a>
-      <a class="justify-content-center nav-link text-light" id="about-tab" data-bs-target="#about"  data-bs-toggle="pill" aria-controls="about"
+      <a class="nav-link" id="about-tab" href="#about" role="tab" data-bs-target="#about" data-bs-toggle="pill" aria-controls="about"
          aria-selected="false">
         <span data-i18n="about">About</span></a>
-      <footer class="d-none d-md-flex mt-4 mb-1 text-uppercase position-absolute small text-muted">
-        © 2021-2025 JFX · 2026 vrpolice<br>
-        https://github.com/vrpolice/markdown-here-revival
+      <footer class="d-none d-md-block small text-muted">
+        <span>© 2021-2025 JFX · 2026 vrpolice</span>
+        <a href="https://github.com/vrpolice/markdown-here-revival">GitHub</a>
       </footer>
     </nav>
-    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 px-4 mt-5 mt-md-0">
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 settings-main">
       <form id="mdh-options-form">
-        <div>
-          <h2 class="pb-3 mt-0"><img class="text-align" src="../images/md_fucsia.svg" width="96"
-                                     height="96" alt="logo" />
-            <span data-i18n="page_title"
-                  data-i18n-arg="__app_name">Markdown Here Revival Options</span></h2>
+        <div class="settings-heading">
+          <img src="../images/md_fucsia.svg" width="48" height="48" alt="" />
+          <h1 data-i18n="page_title" data-i18n-arg="__app_name">Markdown Here Revival Options</h1>
         </div>
 
         <div class="content">
@@ -181,8 +179,8 @@
                   <div class="form-check">
                     <input id="use-bodytext-format" class="form-check-input" type="checkbox" name="use-bodytext-enabled"/>
                     <label class="form-check-label" for="use-bodytext-format" data-i18n="use_bodytext_format_label">Use Body Text format in composer</label>
-                    <div>
-                      <div class="ms-3 float-start fs-5">⚠️</div>
+                    <div class="setting-note">
+                      <span class="warning-mark" aria-hidden="true">!</span>
                       <div class="d-md-block ps-5" data-i18n="use_bodytext_format_description" data-i18n-arg="__use_paragraph_setting_label">
                         This add-on works best when “Use Paragraph format instead of Body Text by default” is disabled in Thunderbird's Settings. Enable this option to apply the recommended setting.
                       </div>
@@ -223,7 +221,7 @@
                            data-i18n="emoji_shortcode_enabled_label">Enable :emoji: (GitHub style)
                       Shortcodes</label>
                   </div>
-                  <div class="form-check" style="padding-left: 3em">
+                  <div class="form-check nested-option">
                     <input id="emoji-autocomplete" class="form-check-input" type="checkbox"
                            name="emoji-autocomplete-enabled" />
                     <label class="form-check-label" for="emoji-autocomplete"

@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.0.21]
+
+### Changed
+- Update Thunderbird compatibility metadata to allow installation on
+  Thunderbird 153 (`strict_max_version: 153.*`)
+- Update README and project website compatibility text for Thunderbird 128–153
+- Redesign the options page to match Thunderbird's current visual language,
+  with adaptive light and dark colors, native system typography, responsive
+  navigation, clearer setting groups, and no remote font dependency
+
+### 中文
+- 更新 Thunderbird 兼容性元数据，允许在 Thunderbird 153 上安装
+  （`strict_max_version: 153.*`）
+- 同步 README 和项目网页中的兼容范围说明到 Thunderbird 128–153
+- 重新设计选项页面，使其更贴近当前 Thunderbird 的视觉风格，包括自适应
+  明暗配色、系统字体、响应式导航、更清晰的设置分组，并移除远程字体依赖
+
 ## [4.0.20]
 
 ### Fixed
