@@ -7,13 +7,17 @@
 /*
  * Mail Extension background script.
  */
-import { getMessage, sha256Digest, toInt } from "./async_utils.mjs"
+import { getMessage, toInt } from "./async_utils.mjs"
 import {
   normalizeBoolean,
   prepareBeforeSend,
   sendModeToComposeWindows,
   waitForNotificationResponse,
 } from "./background-helpers.mjs"
+import {
+  RAW_IMAGE_ID_ATTRIBUTE,
+  restoreRawMarkdownImages,
+} from "./raw-markdown-images.mjs"
 import OptionsStore from "./options/options-storage.js"
 import { getShortcutStruct } from "./options/shortcuts.js"
 
@@ -140,8 +144,6 @@ messenger.runtime.onMessage.addListener(
       return updateHotKey(request.hotkey_value, request.hotkey_tooltip)
     } else if (request.action === "compose-data") {
       return getComposeData(sender.tab)
-    } else if (request.action === "sha256") {
-      return sha256Digest(request.data)
     } else if (request.action === "mdhr-mode-set") {
       if (request.mode && request.mode === "classic") {
         return setClassicMode(request.hidden)
@@ -205,7 +207,13 @@ function loadOldMarkdown(bodyHTML) {
   const rawMDHR = mailDocument.body.querySelectorAll(".mdhr-raw")
   if (rawMDHR.length === 1) {
     const data = rawMDHR[0].title.substring(4)
-    return base64ToStr(data)
+    const rawHTML = base64ToStr(data)
+    if (!rawHTML.includes(RAW_IMAGE_ID_ATTRIBUTE)) {
+      return rawHTML
+    }
+    const rawDocument = new DOMParser().parseFromString(rawHTML, "text/html")
+    restoreRawMarkdownImages(rawDocument, mailDocument)
+    return rawDocument.body.innerHTML
   }
 }
 
@@ -243,6 +251,7 @@ messenger.composeScripts.register({
   js: [
     { file: "vendor/textcomplete.js" },
     { file: "auto-emoji.js" },
+    { file: "compose-preview-helpers.js" },
     { file: "composescript.js" },
   ],
   css: [{ file: "composestyles.css" }, { file: "textcomplete.css" }],

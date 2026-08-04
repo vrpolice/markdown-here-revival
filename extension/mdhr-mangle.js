@@ -7,10 +7,6 @@
 import TurndownService from "./vendor/turndown.esm.js"
 import { degausser } from "./vendor/degausser.esm.js"
 
-async function sha256Digest(data) {
-  return messenger.runtime.sendMessage({ action: "sha256", data: data })
-}
-
 async function convertToText(elem) {
   if (messenger.messengerUtilities?.convertToPlainText === undefined) {
     return degausser(elem)
@@ -22,6 +18,8 @@ async function convertToText(elem) {
 
 export class MdhrMangle {
   #excludedContent = new Map()
+  #placeholderPrefix = `MDHR-${crypto.randomUUID()}-`
+  #placeholderIndex = 0
   #result_html
   constructor(msgDocument) {
     this.doc = msgDocument
@@ -42,12 +40,11 @@ export class MdhrMangle {
     }
 
     const excluded = this.doc.querySelectorAll(
-      // eslint-disable-next-line max-len
       "body > blockquote[type='cite'], body > .moz-signature, body > div.moz-forward-container, img, div.mdhr-raw",
     )
     for (const e of excluded) {
       const excludeContent = e.outerHTML
-      const placeholder = `MDHR-${await sha256Digest(excludeContent)}`
+      const placeholder = `${this.#placeholderPrefix}${this.#placeholderIndex++}`
       this.#excludedContent.set(placeholder, excludeContent)
       const placeholderElem = this.doc.createElement("span")
       placeholderElem.innerText = placeholder

@@ -18,6 +18,7 @@ import { CSSInliner } from "./css-inliner.js"
 import { MdhrMangle } from "../mdhr-mangle.js"
 import { strToBase64 } from "../base64.js"
 import { markdownRender, resetMarked } from "../markdown-render.js"
+import { deduplicateRawMarkdownImages } from "../raw-markdown-images.mjs"
 
 const STYLE_ELEM_IDS = ["MDHR_syntax_css", "MDHR_main_css"]
 const REMOVE_ELEM_IDS = ["MDHR_CSP", "MDHR_tb_style", "MDHR_preview_style"]
@@ -27,6 +28,9 @@ const MDHR_RAW_CSS =
   "height:0;width:0;max-height:0;max-width:0;overflow:hidden;font-size:0;padding:0;margin:0;"
 
 let cssInliner
+const PREVIEW_IMAGE_ID_ATTRIBUTE = "data-mdhr-preview-image-id"
+const imageSessionId = crypto.randomUUID()
+const previewImageCache = new Map()
 
 function escapeHTML(strings, html) {
   return `${DOMPurify.sanitize(html)}`
@@ -102,7 +106,36 @@ function deShadowRoot(doc) {
   }
 }
 
-async function renderMDEmail(msg_html) {
+function restorePreviewImages(doc, imageIds, imageSources) {
+  const activeImageIds = new Set(imageIds || [])
+  for (const [imageId, source] of Object.entries(imageSources || {})) {
+    if (activeImageIds.has(imageId) && typeof source === "string") {
+      previewImageCache.set(imageId, source)
+    }
+  }
+  for (const imageId of previewImageCache.keys()) {
+    if (!activeImageIds.has(imageId)) {
+      previewImageCache.delete(imageId)
+    }
+  }
+
+  const missingImageIds = []
+  for (const image of doc.querySelectorAll(
+    `img[${PREVIEW_IMAGE_ID_ATTRIBUTE}]`,
+  )) {
+    const imageId = image.getAttribute(PREVIEW_IMAGE_ID_ATTRIBUTE)
+    const source = previewImageCache.get(imageId)
+    if (source) {
+      image.setAttribute("src", source)
+      image.removeAttribute(PREVIEW_IMAGE_ID_ATTRIBUTE)
+    } else {
+      missingImageIds.push(imageId)
+    }
+  }
+  return missingImageIds
+}
+
+async function renderMDEmail(msg_html, imageIds, imageSources) {
   /* cp.render-preview */
   const msgDocument = parseHTMLFromString(msg_html)
   const mdHtmlToText = new MdhrMangle(msgDocument)
@@ -112,6 +145,7 @@ async function renderMDEmail(msg_html) {
 
   let doc = addDoctype(unsanitized_html)
   doc = parseHTMLFromString(escapeHTML`${doc}`)
+  const missingImageIds = restorePreviewImages(doc, imageIds, imageSources)
   doc = wrapExternal(doc)
   if (!contentDiv) {
     contentDiv = p_iframe.contentDocument.body.querySelector(
@@ -119,7 +153,7 @@ async function renderMDEmail(msg_html) {
     )
   }
   contentDiv.replaceChildren(...doc.body.childNodes)
-  return true
+  return { imageSessionId, missingImageIds }
 }
 
 async function sendPreviewStateToCompose(tabId, value) {
@@ -185,7 +219,8 @@ async function setModernMode() {
   }
 }
 
-function getMdhrRaw(msg_doc) {
+function getMdhrRaw(msg_doc, renderedDocument) {
+  deduplicateRawMarkdownImages(msg_doc, renderedDocument)
   const content = `${msg_doc.body.innerHTML}`
   const rawHolder = msg_doc.createElement("div")
   rawHolder.classList.add("mdhr-raw")
@@ -208,7 +243,7 @@ async function getMsgContent() {
     action: "get-raw-html",
   })
   const msg_doc = parseHTMLFromString(msg_html)
-  const msg_raw = getMdhrRaw(msg_doc)
+  const msg_raw = getMdhrRaw(msg_doc, html_msg)
 
   // Inject the message source into the HTML message about to send
   html_msg.body.insertAdjacentElement("beforeend", msg_raw)
@@ -368,7 +403,11 @@ messenger.runtime.onMessage.addListener(
           if (sender.tab.windowId !== context.windowId) {
             return false
           }
-          return renderMDEmail(request.doc_html)
+          return renderMDEmail(
+            request.doc_html,
+            request.image_ids,
+            request.image_sources,
+          )
         case "cp.renderer-reset":
           return resetMarked()
         case "cp.toggle-preview":

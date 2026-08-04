@@ -5,13 +5,19 @@
  */
 
 "use strict"
-// global autoEmoji
+// global autoEmoji, MdhrPreviewHelpers
+
+const PREVIEW_IMAGE_ID_ATTRIBUTE = "data-mdhr-preview-image-id"
+const imageStateByElement = new WeakMap()
+const imageStateById = new Map()
+let nextImageId = 0
+let previewSessionId = null
 
 let previewHidden = null
 
 function requestHandler(request, sender, sendResponse) {
   if (request.action === "request-preview") {
-    return sendHTMLToPreview()
+    return requestPreviewRender()
   } else if (request.action === "md-preview-toggle") {
     previewHidden = request.value
     if (!previewHidden) {
@@ -39,7 +45,10 @@ messenger.runtime.sendMessage({ action: "compose-data" }).then((response) => {
   if (response.reply_position === "bottom") {
     let mailBody = window.document.body
     let firstChild = mailBody.firstElementChild
-    if (firstChild.nodeName === "DIV" && firstChild.classList.contains("moz-cite-prefix")) {
+    if (
+      firstChild.nodeName === "DIV" &&
+      firstChild.classList.contains("moz-cite-prefix")
+    ) {
       let insertElem
       if (response.use_paragraph) {
         insertElem = window.document.createElement("p")
@@ -50,7 +59,7 @@ messenger.runtime.sendMessage({ action: "compose-data" }).then((response) => {
       mailBody.insertAdjacentElement("afterbegin", insertElem)
     }
   }
-  return sendHTMLToPreview().then()
+  return requestPreviewRender().then()
 })
 
 async function looksLikeMarkdown(msgDocument) {
@@ -109,38 +118,107 @@ async function looksLikeMarkdown(msgDocument) {
   return false
 }
 
-async function sendHTMLToPreview() {
-  await messenger.runtime.sendMessage({
-    action: "cp.render-preview",
-    doc_html: window.document.documentElement.outerHTML,
+function createPreviewSnapshot() {
+  const clonedDocument = window.document.documentElement.cloneNode(true)
+  const sourceImages = [...window.document.querySelectorAll("img")]
+  const clonedImages = [...clonedDocument.querySelectorAll("img")]
+  const activeImageIds = new Set()
+  const imageSources = {}
+
+  sourceImages.forEach((sourceImage, index) => {
+    const source = sourceImage.getAttribute("src")
+    if (!source?.startsWith("data:")) {
+      return
+    }
+
+    let imageState = imageStateByElement.get(sourceImage)
+    if (!imageState || imageState.source !== source) {
+      if (imageState) {
+        imageStateById.delete(imageState.id)
+      }
+      imageState = {
+        id: `compose-image-${nextImageId++}`,
+        source,
+        sentSessionId: undefined,
+      }
+      imageStateByElement.set(sourceImage, imageState)
+      imageStateById.set(imageState.id, imageState)
+    }
+
+    activeImageIds.add(imageState.id)
+    const clonedImage = clonedImages[index]
+    if (clonedImage) {
+      clonedImage.removeAttribute("src")
+      clonedImage.setAttribute(PREVIEW_IMAGE_ID_ATTRIBUTE, imageState.id)
+    }
+
+    if (imageState.sentSessionId !== previewSessionId) {
+      imageSources[imageState.id] = source
+    }
   })
+
+  for (const imageId of imageStateById.keys()) {
+    if (!activeImageIds.has(imageId)) {
+      imageStateById.delete(imageId)
+    }
+  }
+
+  return {
+    docHTML: clonedDocument.outerHTML,
+    imageIds: [...activeImageIds],
+    imageSources,
+  }
 }
-const debouncedRenderPreview = debounce(sendHTMLToPreview, 500)
+
+async function sendPreviewSnapshot() {
+  const snapshot = createPreviewSnapshot()
+  const response = await messenger.runtime.sendMessage({
+    action: "cp.render-preview",
+    doc_html: snapshot.docHTML,
+    image_ids: snapshot.imageIds,
+    image_sources: snapshot.imageSources,
+  })
+
+  if (!response?.imageSessionId) {
+    return
+  }
+
+  previewSessionId = response.imageSessionId
+  for (const imageId of Object.keys(snapshot.imageSources)) {
+    const imageState = imageStateById.get(imageId)
+    if (imageState) {
+      imageState.sentSessionId = previewSessionId
+    }
+  }
+
+  for (const imageId of response.missingImageIds || []) {
+    const imageState = imageStateById.get(imageId)
+    if (imageState) {
+      imageState.sentSessionId = undefined
+    }
+  }
+  if (response.missingImageIds?.length > 0) {
+    requestPreviewRender()
+  }
+}
+
+const requestPreviewRender =
+  MdhrPreviewHelpers.createLatestTaskRunner(sendPreviewSnapshot)
+const debouncedRenderPreview = MdhrPreviewHelpers.debounceTrailing(
+  requestPreviewRender,
+  500,
+)
 
 let currentlyScrolling = null
 
 function calculateScrollPercentage(elem) {
   const scrolledAvbSpace = elem.scrollHeight - elem.clientHeight
-  const scrolledAmount = elem.scrollTop * (1 + elem.clientHeight / scrolledAvbSpace)
+  const scrolledAmount =
+    elem.scrollTop * (1 + elem.clientHeight / scrolledAvbSpace)
   return scrolledAmount / elem.scrollHeight
 }
 
-function debounce(cb, wait = 500) {
-  let debounceTimer
-  let debounceWhen = 0
-  return function () {
-    const context = this
-    const args = arguments
-    if (Date.now() - debounceWhen > wait) {
-      cb.apply(context, args)
-      clearTimeout(debounceTimer)
-    }
-    debounceTimer = setTimeout(() => cb.apply(context, args), wait)
-    debounceWhen = Date.now()
-  }
-}
-
-const clearCurrentlyScrolling = debounce(() => {
+const clearCurrentlyScrolling = MdhrPreviewHelpers.debounceTrailing(() => {
   currentlyScrolling = null
 }, 1000)
 
@@ -179,8 +257,10 @@ async function editorMutationCb(mutationList, observer) {
   // they are on IMG elements.
   const hasContentChange = mutationList.some((record) => {
     if (record.type === "characterData") return true
-    if (record.type === "childList"
-        && (record.addedNodes.length > 0 || record.removedNodes.length > 0)) {
+    if (
+      record.type === "childList" &&
+      (record.addedNodes.length > 0 || record.removedNodes.length > 0)
+    ) {
       return true
     }
     if (record.type === "attributes" && record.target.nodeName === "IMG") {

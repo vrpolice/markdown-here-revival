@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.0.22]
+
+### Fixed
+- Coalesce live-preview updates so only one render runs at a time and remove
+  the duplicate leading render from the preview debounce
+- Transfer embedded image data to the preview once per image instead of
+  copying every Base64 source again after each editor change
+- Avoid copying complete image data to the background process when generating
+  Markdown rendering placeholders
+- Store references to rendered inline images in the hidden Markdown source
+  instead of embedding a second Base64 copy, while preserving Edit as New with
+  Markdown and compatibility with messages sent by earlier versions
+
+### 中文
+- 合并实时预览更新，确保同一时间只有一个渲染任务，并移除防抖过程中重复的
+  首次渲染
+- 每张内嵌图片只向预览端传输一次，避免编辑器每次变化都重复复制 Base64 图片
+- 生成 Markdown 渲染占位符时不再将完整图片数据复制到后台进程
+- 隐藏的 Markdown 原文改为引用已渲染的内联图片，不再保存第二份 Base64
+  图片；同时保留“以 Markdown 形式重新编辑”及旧版本邮件兼容性
+
 ## [4.0.21]
 
 ### Changed
