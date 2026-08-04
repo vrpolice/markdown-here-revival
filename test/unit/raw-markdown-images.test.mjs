@@ -65,18 +65,35 @@ test("raw Markdown stores references instead of duplicate embedded images", () =
   assert.equal(rawRemote.getAttribute("src"), "https://example.com/logo.png")
 })
 
-test("editing a sent message restores image references into raw Markdown", () => {
+test("editing a sent message restores image references into raw Markdown", async () => {
   const rawImage = new FakeImage({ [RAW_IMAGE_ID_ATTRIBUTE]: "0" })
   const renderedImage = new FakeImage({
     [RAW_IMAGE_ID_ATTRIBUTE]: "0",
     src: "cid:part1@example.invalid",
   })
 
-  const count = restoreRawMarkdownImages(
+  const count = await restoreRawMarkdownImages(
     createDocument([rawImage]),
     createDocument([renderedImage]),
   )
 
   assert.equal(count, 1)
   assert.equal(rawImage.getAttribute("src"), "cid:part1@example.invalid")
+})
+
+test("image resolver can restore a source when visible markers were stripped", async () => {
+  const rawImage = new FakeImage({ [RAW_IMAGE_ID_ATTRIBUTE]: "0" })
+
+  const count = await restoreRawMarkdownImages(
+    createDocument([rawImage]),
+    createDocument([]),
+    async (source, context) => {
+      assert.equal(source, undefined)
+      assert.equal(context.position, 0)
+      return "data:image/jpeg;base64,restored"
+    },
+  )
+
+  assert.equal(count, 1)
+  assert.equal(rawImage.getAttribute("src"), "data:image/jpeg;base64,restored")
 })

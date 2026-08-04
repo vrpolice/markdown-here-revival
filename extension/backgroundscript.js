@@ -18,6 +18,7 @@ import {
   RAW_IMAGE_ID_ATTRIBUTE,
   restoreRawMarkdownImages,
 } from "./raw-markdown-images.mjs"
+import { createInlineImageResolver } from "./message-inline-images.mjs"
 import OptionsStore from "./options/options-storage.js"
 import { getShortcutStruct } from "./options/shortcuts.js"
 
@@ -202,7 +203,18 @@ function base64ToStr(base64) {
   return new TextDecoder().decode(arr)
 }
 
-function loadOldMarkdown(bodyHTML) {
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.addEventListener("load", () => resolve(reader.result), {
+      once: true,
+    })
+    reader.addEventListener("error", () => reject(reader.error), { once: true })
+    reader.readAsDataURL(file)
+  })
+}
+
+async function loadOldMarkdown(bodyHTML, resolveImageSource) {
   const mailDocument = new DOMParser().parseFromString(bodyHTML, "text/html")
   const rawMDHR = mailDocument.body.querySelectorAll(".mdhr-raw")
   if (rawMDHR.length === 1) {
@@ -212,7 +224,18 @@ function loadOldMarkdown(bodyHTML) {
       return rawHTML
     }
     const rawDocument = new DOMParser().parseFromString(rawHTML, "text/html")
-    restoreRawMarkdownImages(rawDocument, mailDocument)
+    await restoreRawMarkdownImages(
+      rawDocument,
+      mailDocument,
+      async (source, context) => {
+        try {
+          return await resolveImageSource(source, context)
+        } catch (error) {
+          console.error("Could not restore an inline Markdown image", error)
+          return source
+        }
+      },
+    )
     return rawDocument.body.innerHTML
   }
 }
@@ -222,10 +245,20 @@ messenger.menus.onClicked.addListener(async (info, tab) => {
     for (const msgHeader of info.selectedMessages.messages) {
       const messageId = msgHeader.id
       let details = {}
+      const attachments = await messenger.messages.listAttachments(messageId)
+      const resolveImageSource = createInlineImageResolver({
+        attachments,
+        getAttachmentFile: (partName) =>
+          messenger.messages.getAttachmentFile(messageId, partName),
+        fileToDataURL,
+      })
       const textParts = await messenger.messages.listInlineTextParts(messageId)
       for (const part of textParts) {
         if (part.contentType === "text/html") {
-          details["body"] = loadOldMarkdown(part.content)
+          details["body"] = await loadOldMarkdown(
+            part.content,
+            resolveImageSource,
+          )
         }
       }
       await messenger.compose.beginNew(messageId, details)

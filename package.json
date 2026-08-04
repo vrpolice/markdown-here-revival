@@ -4,7 +4,7 @@
   "description": "Markdown emails for Mozilla Thunderbird",
   "scripts": {
     "build": "web-ext build -s extension -n markdown-here-revival.xpi",
-    "lint": "eslint eslint.config.js web-ext-config.mjs extension/backgroundscript.js extension/background-helpers.mjs extension/composescript.js extension/compose-preview-helpers.js extension/compose_preview/compose_preview.js extension/mdhr-mangle.js extension/raw-markdown-images.mjs extension/options/options_migration.js extension/options/options-migration-helpers.mjs test/unit",
+    "lint": "eslint eslint.config.js web-ext-config.mjs extension/backgroundscript.js extension/background-helpers.mjs extension/composescript.js extension/compose-preview-helpers.js extension/compose_preview/compose_preview.js extension/mdhr-mangle.js extension/message-inline-images.mjs extension/raw-markdown-images.mjs extension/options/options_migration.js extension/options/options-migration-helpers.mjs test/unit",
     "test": "npm run test:unit",
     "test:unit": "node --test test/unit/*.test.mjs test/docs-pages.test.mjs",
     "test:thunderbird": "web-ext run --keep-profile-changes"

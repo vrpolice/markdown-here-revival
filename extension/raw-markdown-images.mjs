@@ -35,7 +35,11 @@ export function deduplicateRawMarkdownImages(sourceDocument, renderedDocument) {
   return deduplicated
 }
 
-export function restoreRawMarkdownImages(rawDocument, renderedDocument) {
+export async function restoreRawMarkdownImages(
+  rawDocument,
+  renderedDocument,
+  resolveSource = async (source) => source,
+) {
   const renderedImages = new Map()
   for (const image of renderedDocument.body.querySelectorAll(
     `img[${RAW_IMAGE_ID_ATTRIBUTE}]`,
@@ -44,13 +48,18 @@ export function restoreRawMarkdownImages(rawDocument, renderedDocument) {
   }
 
   let restored = 0
-  for (const rawImage of rawDocument.body.querySelectorAll(
+  const rawImages = rawDocument.body.querySelectorAll(
     `img[${RAW_IMAGE_ID_ATTRIBUTE}]`,
-  )) {
+  )
+  for (let position = 0; position < rawImages.length; position++) {
+    const rawImage = rawImages[position]
     const renderedImage = renderedImages.get(
       rawImage.getAttribute(RAW_IMAGE_ID_ATTRIBUTE),
     )
-    const source = renderedImage?.getAttribute("src")
+    const source = await resolveSource(renderedImage?.getAttribute("src"), {
+      imageId: rawImage.getAttribute(RAW_IMAGE_ID_ATTRIBUTE),
+      position,
+    })
     if (!source) {
       continue
     }

@@ -3,6 +3,7 @@
 ## [4.0.22]
 
 ### Fixed
+
 - Coalesce live-preview updates so only one render runs at a time and remove
   the duplicate leading render from the preview debounce
 - Transfer embedded image data to the preview once per image instead of
@@ -12,18 +13,27 @@
 - Store references to rendered inline images in the hidden Markdown source
   instead of embedding a second Base64 copy, while preserving Edit as New with
   Markdown and compatibility with messages sent by earlier versions
+- Restore inline images when using Edit as New with Markdown. Thunderbird
+  converts embedded image sources into MIME references during sending, so the
+  extension resolves their content IDs and MIME parts back to image data before
+  opening the compose window.
 
 ### 中文
+
 - 合并实时预览更新，确保同一时间只有一个渲染任务，并移除防抖过程中重复的
   首次渲染
 - 每张内嵌图片只向预览端传输一次，避免编辑器每次变化都重复复制 Base64 图片
 - 生成 Markdown 渲染占位符时不再将完整图片数据复制到后台进程
 - 隐藏的 Markdown 原文改为引用已渲染的内联图片，不再保存第二份 Base64
   图片；同时保留“以 Markdown 形式重新编辑”及旧版本邮件兼容性
+- 修复使用“以 Markdown 形式重新编辑”时内联图片不显示的问题。Thunderbird
+  发送时会将内嵌图片转换为 MIME 引用，扩展会解析对应的 Content-ID 和
+  MIME part，并在打开写信窗口前恢复图片数据。
 
 ## [4.0.21]
 
 ### Changed
+
 - Update Thunderbird compatibility metadata to allow installation on
   Thunderbird 153 (`strict_max_version: 153.*`)
 - Update README and project website compatibility text for Thunderbird 128–153
@@ -32,6 +42,7 @@
   navigation, clearer setting groups, and no remote font dependency
 
 ### 中文
+
 - 更新 Thunderbird 兼容性元数据，允许在 Thunderbird 153 上安装
   （`strict_max_version: 153.*`）
 - 同步 README 和项目网页中的兼容范围说明到 Thunderbird 128–153
@@ -41,12 +52,14 @@
 ## [4.0.20]
 
 ### Fixed
+
 - Fix unreadable live preview text when Thunderbird is using a dark theme by
   forcing the preview iframe to use a light message canvas with dark text.
   Thanks to @mirenradia for reporting this in
   https://github.com/vrpolice/markdown-here-revival/issues/1.
 
 ### 中文
+
 - 修复 Thunderbird 深色主题下实时预览文字不可读的问题：预览 iframe 现在
   固定使用浅色邮件画布与深色文字。感谢 @mirenradia 在
   https://github.com/vrpolice/markdown-here-revival/issues/1 中反馈。
@@ -54,11 +67,13 @@
 ## [4.0.19]
 
 ### Changed
+
 - Update Thunderbird compatibility metadata to allow installation on
   Thunderbird 152 (`strict_max_version: 152.*`)
 - Update README and project website compatibility text for Thunderbird 128–152
 
 ### 中文
+
 - 更新 Thunderbird 兼容性元数据，允许在 Thunderbird 152 上安装
   （`strict_max_version: 152.*`）
 - 同步 README 和项目网页中的兼容范围说明到 Thunderbird 128–152
@@ -68,6 +83,7 @@
 ### English
 
 #### Fixed
+
 - Cancel sending and show a retry notification when Markdown rendering times
   out, fails, or returns empty content, preventing accidental delivery of raw
   Markdown
@@ -80,6 +96,7 @@
 - Remove CustomUI resize and splitter listeners when preview panels close
 
 #### Changed
+
 - Reduce the privileged CustomUI experiment to the compose-preview features
   used by this extension
 - Add portable unit tests, lint configuration, and GitHub Actions CI
@@ -90,6 +107,7 @@
 ### 中文
 
 #### 修复
+
 - Markdown 渲染超时、异常或返回空内容时取消发送并显示重试通知，避免误发
   未渲染的 Markdown 原文
 - 切换经典/现代模式时传递正确的数字写信窗口 ID
@@ -99,6 +117,7 @@
 - 关闭预览面板时移除 CustomUI 的窗口缩放与分隔条监听器
 
 #### 改进
+
 - 精简 CustomUI 特权代码，仅保留扩展实际使用的写信预览功能
 - 增加可移植单元测试、代码检查配置和 GitHub Actions CI
 - 移除未使用的 `accountsRead` 权限
@@ -107,12 +126,14 @@
 ## [4.0.17]
 
 ### Fixed
+
 - Preview pane now maintains its width ratio when the compose window is resized
 - Signature content no longer flickers when dragging the splitter left
   (MutationObserver was treating the record array as a single object, so
   attribute-change filtering never worked)
 
 ### Changed
+
 - Extension ID changed to `markdown-here-revival@vrpolice.github.io` to
   avoid conflict with the upstream ATN listing
 - Options page branding updated: footer credits, bug report link, license
@@ -122,18 +143,21 @@
 ## [4.0.16]
 
 ### Fixed
+
 - Options page "Basic CSS" was empty due to missing CHANGELOG.md in extension
   bundle causing a NetworkError that aborted page initialization
 - Added error handling to changelog loader so a fetch failure does not block
   the rest of the options page
 
 ### Changed
+
 - Updated authorship and homepage URL to this fork
 - LICENSE now includes all three generations of copyright holders
 
 ## [4.0.15]
 
 ### Changed
+
 - Overhaul default email CSS for a clean, professional business style:
   refined typography with system font stack, lighter heading borders,
   GitHub-style code blocks, subtle zebra-striped tables with header
@@ -142,6 +166,7 @@
 ## [4.0.14]
 
 ### Fixed
+
 - Splitter divider line between Markdown editor and preview pane was invisible
   in Thunderbird 151 ESR due to missing `--splitter-color` CSS variable
 - Default preview panel width is now centered (50% of window) instead of
@@ -151,11 +176,13 @@
 ## [4.0.13]
 
 ### Changed
+
 - Update `strict_max_version` to `151.*` to support Thunderbird 151 ESR
 
 ## [4.0.12]
 
 ### Fixed
+
 - MDHR was not working with Thunderbird 148.0 and up. Thank you Cliff Brake for
   tracking down the problems and providing fixes.
 - Dependency updates
@@ -167,6 +194,7 @@
 ## [4.0.9.1]
 
 ### New
+
 - Add option to use Body Text format in composer. Body Text is the preferred
   format to ensure all features work properly. Tables and code blocks do
   not render correctly with Paragraph mode.
@@ -174,6 +202,7 @@
 ### [4.0.9] (unreleased)
 
 ### Fixed
+
 - Math rendering was always enabled (Thanks Sarke!)
 - Disable preview update prior to sending to prevent flash of double-rendered
   content in the preview pane
@@ -183,6 +212,7 @@
   empty vertical space
 
 ### Changed
+
 - Refactored dynamic imports out of the composescript.
 - Remove fuse.js dependency
 
@@ -204,6 +234,7 @@
 ## [4.0.7]
 
 ### Fixed
+
 - Some sent messages had overlapping text blocks
   [#129](https://gitlab.com/jfx2006/markdown-here-revival/-/issues/129)
   [#132](https://gitlab.com/jfx2006/markdown-here-revival/-/issues/132)
@@ -218,16 +249,19 @@
 ## [4.0.6]
 
 ### Fixed
+
 - Thunderbird's dark mode interfered with MDHR CSS-inlining causing unreadable
   text in the sent message
 
 ### Unresolved
+
 - "textcomplete.css" appears as a linked stylesheet in messages sent with
   Markdown rendering disabled [#125](https://gitlab.com/jfx2006/markdown-here-revival/-/issues/125)
 
 ## [4.0.5] (not released on ATN)
 
 ### Fixed
+
 - Fix problems with options not saving in the last couple versions.
   [#120](https://gitlab.com/jfx2006/markdown-here-revival/-/issues/120)
   [#119](https://gitlab.com/jfx2006/markdown-here-revival/-/issues/119)
@@ -244,11 +278,13 @@
 ## [4.0.3.3]
 
 ### Changed
+
 - Syntax for Bug/Issue links changed to `#bugno` to align with what Github/Gitlab
   use
 - Generic directive syntax `:span[text]{.classname attr="foo"}` enabled
 
 ### Fixed
+
 - Vertical lines left adjacent to block quotes not present (default css fix)
   [#104](https://gitlab.com/jfx2006/markdown-here-revival/-/issues/104)
 - Update popup could open in compose window
@@ -263,10 +299,12 @@
 ## [4.0.2]
 
 ### New
+
 - Issue or Bug linking directive. :issue[34] or :bug[123445]. The URL and link
   text are configurable in Options.
 
 ### Fixed
+
 - Disable excessive logging of options changes
 - Fix locale-maker save data issue
 
@@ -330,14 +368,14 @@
 ### Fixed
 
 - Fix up modern mode after using classic mode. #77
-- Add a "Reset Preview" item to the compose action context menu. 
+- Add a "Reset Preview" item to the compose action context menu.
 - Automate release workflow as much as possible.
 
 ## [4.0 beta 14]
 
 ### Fixed
 
-- Fix handling of multiple images.  #76.
+- Fix handling of multiple images. #76.
 - Custom CSS styles did not apply to emails. #83.
 
 ### Changed
@@ -412,8 +450,7 @@
 - "Translate" page borrowed from FireMonkey to help with submitting translations
 
 [HEAD]: https://gitlab.com/jfx2006/markdown-here-revival/-/tags/vHEAD
-
-[//]: # (C3-2-DKAC:GGL:Rjfx2006/markdown-here-revival:Tv{t})
+[//]: # "C3-2-DKAC:GGL:Rjfx2006/markdown-here-revival:Tv{t}"
 
 # About changelog
 
