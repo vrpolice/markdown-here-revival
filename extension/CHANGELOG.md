@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.0.22b]
+
+### Fixed
+
+- Apply classic and modern preview mode changes to compose windows opened
+  later in the same Thunderbird session, without requiring a restart.
+- Clear the classic full-width layout when switching an open compose window
+  back to modern preview mode.
+
+### 中文
+
+- 修复在同一次 Thunderbird 会话中切换经典或现代预览模式后，新建写信窗口
+  仍沿用旧模式的问题，无需重启即可应用设置。
+- 修复已打开的写信窗口从经典模式切回现代模式时可能残留全宽布局的问题。
+
 ## [4.0.22]
 
 ### Fixed

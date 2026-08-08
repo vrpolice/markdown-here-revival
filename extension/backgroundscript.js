@@ -584,6 +584,7 @@ async function setClassicMode(hidden = true) {
     "preview-width"
   ]
   await OptionsStore.set({ "saved-preview-width": previewWidth })
+  await updatePreviewRegistration({ mode: "classic", hidden: true })
   const wins = await getOpenComposeWindows()
   for (const win of wins) {
     await sendModeToComposeWindows([win], "cp.set-classic-mode", (message) =>
@@ -604,11 +605,22 @@ async function setClassicMode(hidden = true) {
   }
 }
 
-async function setModernMode(hidden = false) {
-  const savedPreviewWidth = (await OptionsStore.get("saved-preview-width"))[
-    "saved-preview-width"
-  ]
+async function setModernMode(hidden) {
+  const savedState = await OptionsStore.get([
+    "saved-preview-width",
+    "enable-markdown-mode",
+  ])
+  const savedPreviewWidth = savedState["saved-preview-width"]
+  const modernHidden =
+    typeof hidden === "boolean"
+      ? hidden
+      : !normalizeBoolean(savedState["enable-markdown-mode"])
   await OptionsStore.set({ "preview-width": savedPreviewWidth })
+  await updatePreviewRegistration({
+    mode: "modern",
+    width: toInt(savedPreviewWidth),
+    hidden: modernHidden,
+  })
   const wins = await getOpenComposeWindows()
   for (const win of wins) {
     await sendModeToComposeWindows([win], "cp.set-modern-mode", (message) =>
@@ -624,7 +636,7 @@ async function setModernMode(hidden = false) {
       },
       tabId: win.tabs[0].id,
     })
-    await updateHotKey(hidden)
+    await updateHotKey(modernHidden)
     await messenger.menus.update("mdhr-reset-preview", { enabled: true })
   }
 }
@@ -695,7 +707,7 @@ async function injectMDPreview() {
   }
   await messenger.ex_customui.add(
     messenger.ex_customui.LOCATION_COMPOSE_EDITOR,
-    messenger.runtime.getURL("compose_preview/compose_preview.html"),
+    getPreviewURL(),
     options,
   )
   // Restore the saved drafts
@@ -707,10 +719,22 @@ async function unInjectMDPreview() {
   const saved = await saveComposed()
   await messenger.ex_customui.remove(
     messenger.ex_customui.LOCATION_COMPOSE_EDITOR,
-    messenger.runtime.getURL("compose_preview/compose_preview.html"),
+    getPreviewURL(),
   )
   // Restore the saved drafts
   await restoreComposed(saved)
+}
+
+function getPreviewURL() {
+  return messenger.runtime.getURL("compose_preview/compose_preview.html")
+}
+
+async function updatePreviewRegistration(options) {
+  await messenger.ex_customui.update(
+    messenger.ex_customui.LOCATION_COMPOSE_EDITOR,
+    getPreviewURL(),
+    options,
+  )
 }
 
 async function doStartup() {

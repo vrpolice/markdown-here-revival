@@ -326,10 +326,14 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
       });
 
       frame.addCustomUILocalOptionsListener(lOptions => {
-        const mode = frame.getAttribute("data-mode")
+        let mode = frame.getAttribute("data-mode")
         if (typeof lOptions.mode === "string") {
+          mode = lOptions.mode;
           frame.setCustomUIContextProperty("mdhr_mode", lOptions.mode);
           frame.setAttribute("data-mode", lOptions.mode);
+        }
+        if (mode === "modern") {
+          editorCol.style.width = "";
         }
         if (typeof lOptions.hidden === "boolean") {
           previewCol.style.display = lOptions.hidden ? "none" : "inline";
@@ -445,6 +449,17 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
             }
           }
         };
+        // Update defaults for windows opened after an options change without
+        // tearing down the UI in compose windows that are already open.
+        handler.onUpdate = function(url, options) {
+          if (!this.registered.has(url)) {
+            return;
+          }
+          this.registered.set(url, {
+            ...this.registered.get(url),
+            ...options
+          });
+        };
         // Unregisters all registered URLs
         handler.onRemoveAll = function() {
           for (let url of this.registered.keys()) {
@@ -542,6 +557,14 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
           }
           url = context.extension.baseURI.resolve(url);
           locationHandlers[location].onRemove(url);
+        },
+        async update(location, url, options) {
+          if (!locationHandlers[location]) {
+            throw new context.cloneScope.Error("Unsupported location: "
+                + location);
+          }
+          url = context.extension.baseURI.resolve(url);
+          locationHandlers[location].onUpdate(url, options || {});
         }
       }
     };

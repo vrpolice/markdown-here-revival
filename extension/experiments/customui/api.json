@@ -75,6 +75,29 @@
         ]
       },
       {
+        "name": "update",
+        "description": "Updates the registration options used for future native windows without reinjecting existing UI documents.",
+        "type": "function",
+        "async": true,
+        "parameters": [
+          {
+            "name": "location",
+            "type": "string",
+            "description": "The native UI location whose registration should be updated."
+          },
+          {
+            "name": "url",
+            "type": "string",
+            "description": "URL of the registered custom UI document."
+          },
+          {
+            "name": "options",
+            "$ref": "LocationOptions",
+            "description": "Options to merge into the existing registration."
+          }
+        ]
+      },
+      {
         "name": "getContext",
         "description": "If called from within a document loaded as custom UI through this API, this method will return an object with a 'location' value set to the lication the UI was registered for, and potentially additional members describing the state of the location the document is embedded into. Otherwise, the method will fail.",
         "type": "function",
