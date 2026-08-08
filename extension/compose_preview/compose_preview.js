@@ -36,20 +36,31 @@ function escapeHTML(strings, html) {
   return `${DOMPurify.sanitize(html)}`
 }
 
-function removeMDPreviewStyles(html_msg) {
+function cloneRenderedMessage() {
+  const sourceDocument = p_iframe.contentDocument
+  makeStylesExplicit(sourceDocument)
+  const clonedDocument = sourceDocument.cloneNode(true)
+
+  for (const sourceWrapper of sourceDocument.querySelectorAll(
+    "div.external-content",
+  )) {
+    const clonedWrapper = clonedDocument.getElementById(sourceWrapper.id)
+    if (!clonedWrapper || !sourceWrapper.shadowRoot) {
+      continue
+    }
+    clonedWrapper.parentElement.replaceChildren(
+      ...[...sourceWrapper.shadowRoot.childNodes].map((node) =>
+        node.cloneNode(true),
+      ),
+    )
+  }
   for (const styleId of REMOVE_ELEM_IDS) {
-    const elem = html_msg.getElementById(styleId)
-    if (elem) {
-      elem.remove()
-    }
+    clonedDocument.getElementById(styleId)?.remove()
   }
-  makeStylesExplicit(html_msg)
   for (const styleId of STYLE_ELEM_IDS) {
-    const elem = html_msg.getElementById(styleId)
-    if (elem) {
-      elem.remove()
-    }
+    clonedDocument.getElementById(styleId)?.remove()
   }
+  return clonedDocument
 }
 
 function makeStylesExplicit(html_msg) {
@@ -92,18 +103,6 @@ function wrapExternal(doc) {
     element.insertAdjacentElement("afterbegin", wrapper)
   }
   return doc
-}
-
-function deShadowRoot(doc) {
-  const elements = doc.querySelectorAll("div.external-content")
-  for (const element of elements) {
-    if (!element.shadowRoot) {
-      continue
-    }
-    const parent = element.parentElement
-    const children = element.shadowRoot.childNodes
-    parent.replaceChildren(...children)
-  }
 }
 
 function restorePreviewImages(doc, imageIds, imageSources) {
@@ -185,18 +184,11 @@ async function togglePreview(winId) {
   return "rendered"
 }
 
-async function toggleClassicPreview() {
-  const context = await messenger.ex_customui.getContext()
-  const changedHidden = !context.hidden
-  await messenger.ex_customui.setLocalOptions({ hidden: changedHidden })
-  if (changedHidden) {
-    return "inactive"
-  }
-  return "rendered"
-}
-
 async function setClassicMode() {
+  const context = await messenger.ex_customui.getContext()
+  const tabId = await getTabIdFromWinId(context.windowId)
   await messenger.ex_customui.setLocalOptions({ mode: "classic", hidden: true })
+  await sendPreviewStateToCompose(tabId, true)
   await messenger.runtime.sendMessage({ action: "set-composeaction-bw" })
 }
 
@@ -233,9 +225,7 @@ function getMdhrRaw(msg_doc, renderedDocument) {
 }
 
 async function getMsgContent() {
-  const html_msg = p_iframe.contentDocument
-  removeMDPreviewStyles(html_msg)
-  deShadowRoot(html_msg)
+  const html_msg = cloneRenderedMessage()
 
   // Load message source from compose window
   const tabId = await getTabId()
@@ -246,27 +236,26 @@ async function getMsgContent() {
   const msg_raw = getMdhrRaw(msg_doc, html_msg)
 
   // Inject the message source into the HTML message about to send
-  html_msg.body.insertAdjacentElement("beforeend", msg_raw)
+  const wrapper = html_msg.body.querySelector(
+    ":scope > div.markdown-here-wrapper",
+  )
+  const rawContainer = wrapper || html_msg.body
+  rawContainer.insertAdjacentElement("beforeend", msg_raw)
   const serializer = new XMLSerializer()
   return serializer.serializeToString(html_msg)
 }
 
 const onContextChange = async function (context) {
   const mdhr_mode = (await OptionsStore.get("mdhr-mode"))["mdhr-mode"]
-  const data = { "enable-markdown-mode": !context.hidden }
-  if (mdhr_mode === "modern") {
-    let preview_width = context.width
-    if (Boolean(context.width) && context.width < 30) {
-      preview_width = 300
-    }
-    data["preview-width"] = preview_width
-  } else {
-    if (Boolean(data["preview-width"])) {
-      delete data["preview-width"]
-    }
+  if (mdhr_mode !== "modern" || typeof context.width !== "number") {
+    return
+  }
+  let preview_width = context.width
+  if (context.width > 0 && context.width < 30) {
+    preview_width = 300
   }
   try {
-    await OptionsStore.set(data)
+    await OptionsStore.set({ "preview-width": preview_width })
   } catch (e) {
     console.log(e)
   }
@@ -305,16 +294,15 @@ async function previewFrameLoaded(e) {
   const mdhr_mode = (await OptionsStore.get("mdhr-mode"))["mdhr-mode"]
   if (mdhr_mode === "modern") {
     await setModernMode()
+    const tabId = await getTabIdFromWinId(context.windowId)
+    if (tabId) {
+      const enabled = (await OptionsStore.get("enable-markdown-mode"))[
+        "enable-markdown-mode"
+      ]
+      await sendPreviewStateToCompose(tabId, !normalizeBoolean(enabled))
+    }
   } else {
     await setClassicMode()
-  }
-  const tabId = await getTabIdFromWinId(context.windowId)
-  if (tabId) {
-    const enabled = (await OptionsStore.get("enable-markdown-mode"))[
-      "enable-markdown-mode"
-    ]
-    const hidden = !normalizeBoolean(enabled)
-    await sendPreviewStateToCompose(tabId, hidden)
   }
 
   window.addEventListener(
@@ -430,11 +418,6 @@ messenger.runtime.onMessage.addListener(
             return false
           }
           return scrollTo(request.payload)
-        case "cp.toggle-classic-preview":
-          if (request.windowId !== context.windowId) {
-            return false
-          }
-          return toggleClassicPreview()
         case "cp.set-classic-mode":
           if (request.windowId !== context.windowId) {
             return false

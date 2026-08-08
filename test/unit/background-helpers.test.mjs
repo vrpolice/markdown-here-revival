@@ -67,6 +67,23 @@ test("prepareBeforeSend cancels when the unrendered-markdown check fails", async
   assert.match(reportedError.message, /unavailable/)
 })
 
+test("prepareBeforeSend prompts for detected unrendered Markdown", async () => {
+  let prompted = false
+  const result = await prepareBeforeSend({
+    details: { isPlainText: false },
+    markdownEnabled: false,
+    forgotToRenderCheckEnabled: true,
+    checkForMarkdown: async () => true,
+    confirmUnrenderedSend: async () => {
+      prompted = true
+      return false
+    },
+  })
+
+  assert.equal(prompted, true)
+  assert.deepEqual(result, { cancel: true })
+})
+
 test("prepareBeforeSend cancels when rendered content is empty", async () => {
   let reportedError
   const result = await prepareBeforeSend({

@@ -113,6 +113,9 @@ import OptionsStore from "./options-storage.js"
 
       await OptionsStore.syncForm(form)
       form.addEventListener("options-sync:form-synced", await onOptionsSaved)
+      document
+        .getElementById("markdown-mode")
+        .addEventListener("change", handleMarkdownModeDefault)
     }
 
     form.addEventListener("hotkey", handleHotKey)
@@ -310,14 +313,31 @@ import OptionsStore from "./options-storage.js"
     const old_value = value_elem.dataset.value
     const mode_elem = document.querySelector("input[name='mdhr-mode']:checked")
     const new_value = mode_elem.id
-    if (old_value !== new_value || force) {
+    if (force) {
+      updateModeControls(new_value)
+    } else if (old_value !== new_value) {
       if (new_value === "mdhr-classic") {
         await enableClassicOptions()
       } else {
         await enableModernOptions()
       }
-      value_elem.dataset.value = new_value
     }
+    value_elem.dataset.value = new_value
+  }
+
+  function updateModeControls(mode) {
+    const modern = mode === "mdhr-modern"
+    document.getElementById("markdown-mode").disabled = !modern
+    document.getElementById("forgot-to-render").disabled = modern
+  }
+
+  async function handleMarkdownModeDefault(event) {
+    const enabled = event.currentTarget.checked
+    await OptionsStore.set({ "enable-markdown-mode": enabled })
+    await messenger.runtime.sendMessage({
+      action: "mdhr-preview-default-set",
+      enabled,
+    })
   }
 
   async function enableClassicOptions() {

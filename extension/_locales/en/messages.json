@@ -99,7 +99,7 @@
     "description": "Descriptive text explaining the 'forgot-to-render' feature."
   },
   "options_page__composer_start_markdown_mode": {
-    "message": "Start composer in markdown mode"
+    "message": "Show live preview in new compose windows"
   },
   "options_page__use_bodytext_format_label": {
     "message": "Use Body Text format in composer",

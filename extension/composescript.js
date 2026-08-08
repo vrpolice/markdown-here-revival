@@ -8,6 +8,8 @@
 // global autoEmoji, MdhrPreviewHelpers
 
 const PREVIEW_IMAGE_ID_ATTRIBUTE = "data-mdhr-preview-image-id"
+const RAW_IMAGE_ID_ATTRIBUTE = "data-mdhr-raw-image-id"
+const MDHR_RAW_PREFIX = "MDH:"
 const imageStateByElement = new WeakMap()
 const imageStateById = new Map()
 let nextImageId = 0
@@ -18,6 +20,18 @@ let previewHidden = null
 function requestHandler(request, sender, sendResponse) {
   if (request.action === "request-preview") {
     return requestPreviewRender()
+  } else if (request.action === "classic-state") {
+    return Promise.resolve(getClassicWrapper() ? "rendered" : "unrendered")
+  } else if (request.action === "classic-render") {
+    replaceEditorContents(request.html)
+    return Promise.resolve("rendered")
+  } else if (request.action === "classic-restore") {
+    const originalHTML = getClassicOriginalHTML()
+    if (originalHTML === undefined) {
+      return Promise.resolve("unrendered")
+    }
+    replaceEditorContents(originalHTML)
+    return Promise.resolve("unrendered")
   } else if (request.action === "md-preview-toggle") {
     previewHidden = request.value
     if (!previewHidden) {
@@ -41,6 +55,73 @@ function requestHandler(request, sender, sendResponse) {
 }
 messenger.runtime.onMessage.addListener(requestHandler)
 
+function getClassicWrapper(doc = window.document) {
+  const wrapper = doc.body.querySelector(":scope > div.markdown-here-wrapper")
+  if (!wrapper?.querySelector(":scope > div.mdhr-raw")) {
+    return null
+  }
+  return wrapper
+}
+
+function decodeBase64UTF8(base64) {
+  const bytes = Uint8Array.from(atob(base64), (char) => char.codePointAt(0))
+  return new TextDecoder().decode(bytes)
+}
+
+function getClassicOriginalHTML() {
+  const wrapper = getClassicWrapper()
+  const rawHolder = wrapper?.querySelector(":scope > div.mdhr-raw")
+  if (!rawHolder?.title.startsWith(MDHR_RAW_PREFIX)) {
+    return undefined
+  }
+  const originalHTML = decodeBase64UTF8(
+    rawHolder.title.slice(MDHR_RAW_PREFIX.length).replace(/\s/g, ""),
+  )
+  const originalDocument = new DOMParser().parseFromString(
+    originalHTML,
+    "text/html",
+  )
+  const renderedImages = new Map()
+  for (const image of wrapper.querySelectorAll(
+    `img[${RAW_IMAGE_ID_ATTRIBUTE}]`,
+  )) {
+    renderedImages.set(
+      image.getAttribute(RAW_IMAGE_ID_ATTRIBUTE),
+      image.getAttribute("src"),
+    )
+  }
+  for (const image of originalDocument.body.querySelectorAll(
+    `img[${RAW_IMAGE_ID_ATTRIBUTE}]`,
+  )) {
+    const source = renderedImages.get(
+      image.getAttribute(RAW_IMAGE_ID_ATTRIBUTE),
+    )
+    if (source) {
+      image.setAttribute("src", source)
+    }
+  }
+  return originalDocument.body.innerHTML
+}
+
+function replaceEditorContents(html) {
+  const body = window.document.body
+  const range = window.document.createRange()
+  const selection = window.getSelection()
+  range.selectNodeContents(body)
+  selection.removeAllRanges()
+  selection.addRange(range)
+
+  if (!window.document.execCommand("insertHTML", false, html)) {
+    range.deleteContents()
+    range.insertNode(range.createContextualFragment(html))
+  }
+  selection.removeAllRanges()
+  const caret = window.document.createRange()
+  caret.selectNodeContents(body)
+  caret.collapse(false)
+  selection.addRange(caret)
+}
+
 messenger.runtime.sendMessage({ action: "compose-data" }).then((response) => {
   if (response.reply_position === "bottom") {
     let mailBody = window.document.body
@@ -63,59 +144,29 @@ messenger.runtime.sendMessage({ action: "compose-data" }).then((response) => {
 })
 
 async function looksLikeMarkdown(msgDocument) {
-  let mdMaybe = msgDocument.body.innerText
-  // Ensure that we're not checking on enormous amounts of text.
-  if (mdMaybe.length > 10000) {
-    mdMaybe = mdMaybe.slice(0, 10000)
+  if (getClassicWrapper(msgDocument)) {
+    return false
   }
-  // At least two bullet points
-  const bulletList = mdMaybe.match(/^[*+-] /gm)
-  if (bulletList && bulletList.length > 1) {
-    return true
+  const content = msgDocument.body.cloneNode(true)
+  for (const external of content.querySelectorAll(
+    ":scope > blockquote[type='cite'], :scope > .moz-signature, :scope > div.moz-forward-container, div.mdhr-raw",
+  )) {
+    external.remove()
   }
+  return MdhrPreviewHelpers.looksLikeMarkdownText(getDetectionText(content))
+}
 
-  // Backticks == code. Does anyone use backticks for anything else?
-  const backticks = mdMaybe.match(/`/)
-  if (backticks) {
-    return true
+function getDetectionText(content) {
+  for (const lineBreak of content.querySelectorAll("br")) {
+    lineBreak.replaceWith("\n")
   }
-
-  // Math
-  const math = mdMaybe.match(/\$([^ \t\n$]([^$]*[^ \t\n$])?)\$/)
-  if (math) {
-    return true
+  for (const block of content.querySelectorAll(
+    "address, article, aside, blockquote, div, dl, fieldset, figure, footer, h1, h2, h3, h4, h5, h6, header, hr, li, main, nav, ol, p, pre, section, table, ul",
+  )) {
+    block.insertAdjacentText("beforebegin", "\n")
+    block.insertAdjacentText("afterend", "\n")
   }
-
-  // We're going to look for strong emphasis (e.g., double asterisk), but not
-  // light emphasis (e.g., single asterisk). Rationale: people use surrounding
-  // single asterisks pretty often in ordinary, non-MD text, and we don't want
-  // to be annoying.
-  // TODO: If we ever get really fancy with MD detection, the presence of light
-  // emphasis should still contribute towards the determination.
-  const emphasis = mdMaybe.match(/__([\s\S]+?)__(?!_)|\*\*([\s\S]+?)\*\*(?!\*)/)
-  if (emphasis) {
-    return true
-  }
-
-  // Headers. (But not hash-mark-H1, since that seems more likely to false-positive, and
-  // less likely to be used. And underlines of at least length 5.)
-  const header = mdMaybe.match(/(^\s{0,3}#{2,6}[^#])|(^\s*[-=]{5,}\s*$)/m)
-  if (header) {
-    return true
-  }
-
-  // Links
-  // I'm worried about incorrectly catching square brackets in rendered code
-  // blocks, so we're only going to look for '](' and '][' (which still aren't
-  // immune to the problem, but a little better). This means we won't match
-  // reference links (where the text in the square brackes is used elsewhere for
-  // for the link).
-  const link = mdMaybe.match(/\]\(|\]\[/)
-  if (link) {
-    return true
-  }
-
-  return false
+  return content.textContent
 }
 
 function createPreviewSnapshot() {
@@ -300,3 +351,16 @@ async function loadEmojiCompleter() {
   MsgMutationObserver.observe(window.document.body, mutation_config)
   await loadEmojiCompleter()
 })()
+
+window.addEventListener(
+  "pagehide",
+  () => {
+    previewHidden = true
+    MsgMutationObserver?.disconnect()
+    debouncedRenderPreview.cancel()
+    clearCurrentlyScrolling.cancel()
+    emojiDestroy?.()
+    emojiDestroy = null
+  },
+  { once: true },
+)

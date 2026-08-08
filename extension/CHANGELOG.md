@@ -1,19 +1,54 @@
 # Changelog
 
-## [4.0.22b]
+## [4.0.23]
 
 ### Fixed
 
-- Apply classic and modern preview mode changes to compose windows opened
-  later in the same Thunderbird session, without requiring a restart.
-- Clear the classic full-width layout when switching an open compose window
-  back to modern preview mode.
+- Restore the intended mode-specific toolbar behavior: modern mode toggles the
+  live preview pane, while classic mode renders Markdown directly in the
+  compose editor and restores the original Markdown on the next click.
+- Reimplement classic rendering with an in-editor wrapper instead of repeatedly
+  replacing the complete compose body through the Compose API, preventing
+  Thunderbird from hanging when a message is rendered, restored, rendered
+  again, and then closed.
+- Apply classic and modern mode changes to existing and future compose windows
+  in the same Thunderbird session, and clear classic full-width layout state
+  when returning to modern mode.
+- Keep the modern toolbar icon and preview visibility synchronized without
+  overwriting the user's default for newly opened compose windows.
+- Make the forgot-to-render warning recognize common Markdown including level-1
+  headings, fenced code, block quotes, task lists, numbered lists, links, and
+  Thunderbird's non-breaking spaces and compose-editor line structure.
+- Stop pending preview work when a compose editor closes and avoid mutating the
+  live preview document when preparing rendered message content.
+
+### Changed
+
+- Rewrite the Simplified and Traditional Chinese translations, restore missing
+  strings, and validate locale keys and placeholders against English.
+- Clarify the live-preview default option for new compose windows.
+
+Thanks to @capac for reporting the classic-mode problem in
+https://github.com/vrpolice/markdown-here-revival/issues/3.
 
 ### 中文
 
-- 修复在同一次 Thunderbird 会话中切换经典或现代预览模式后，新建写信窗口
-  仍沿用旧模式的问题，无需重启即可应用设置。
-- 修复已打开的写信窗口从经典模式切回现代模式时可能残留全宽布局的问题。
+- 恢复两种模式原本的工具栏行为：现代模式点击按钮显示或隐藏实时预览；经典
+  模式点击按钮直接在撰写区渲染 Markdown，再次点击则恢复 Markdown 原文。
+- 经典模式改为通过编辑器内的 wrapper 渲染，不再使用 Compose API 反复替换
+  整封邮件，修复“渲染、还原、再次渲染后关闭窗口”可能导致 Thunderbird
+  卡死的问题。
+- 模式切换现在会同时应用于当前和后续新建的撰写窗口；从经典模式返回现代
+  模式时会清理残留的全宽布局状态。
+- 同步现代模式按钮图标与预览可见状态，同时不再覆盖新建撰写窗口的默认设置。
+- 增强“忘记渲染”检查，可识别一级标题、围栏代码、引用、任务列表、编号列表、
+  Markdown 链接，以及 Thunderbird 编辑器产生的不换行空格和段落结构。
+- 关闭撰写窗口时取消待执行的预览任务；生成邮件内容时不再修改实时预览文档。
+- 重写简体中文和繁体中文翻译，补齐缺失词条，并增加键名及占位符一致性测试。
+- 明确“新建撰写窗口时显示实时预览”选项的含义。
+
+感谢 @capac 在 https://github.com/vrpolice/markdown-here-revival/issues/3
+中反馈经典模式问题。
 
 ## [4.0.22]
 

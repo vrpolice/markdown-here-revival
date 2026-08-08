@@ -151,6 +151,8 @@ messenger.runtime.onMessage.addListener(
       } else if (request.mode && request.mode === "modern") {
         return setModernMode(request.hidden)
       }
+    } else if (request.action === "mdhr-preview-default-set") {
+      return setModernPreviewDefault(request.enabled)
     } else {
       console.log("unmatched request action", request.action)
       throw "unmatched request action: " + request.action
@@ -339,9 +341,12 @@ messenger.compose.onBeforeSend.addListener(async function (tab, details) {
       const savedState = await OptionsStore.get([
         "forgot-to-render-check-enabled",
         "enable-markdown-mode",
+        "mdhr-mode",
       ])
       return {
-        markdownEnabled: savedState["enable-markdown-mode"],
+        markdownEnabled:
+          savedState["mdhr-mode"] === "modern" &&
+          normalizeBoolean(savedState["enable-markdown-mode"]),
         forgotToRenderCheckEnabled:
           savedState["forgot-to-render-check-enabled"],
       }
@@ -437,25 +442,12 @@ async function doClassicRender(windowId) {
     populate: true,
     windowTypes: ["messageCompose"],
   })
-  const icon_type = await messenger.runtime.sendMessage({
-    action: "cp.toggle-classic-preview",
-    windowId: windowId,
-  })
   const tabId = win.tabs[0].id
-  if (icon_type === "rendered") {
-    await messenger.tabs.sendMessage(tabId, { action: "request-preview" })
-    await messenger.composeAction.setIcon({
-      path: {
-        16: ICON_RENDERED,
-        19: ICON_RENDERED,
-        32: ICON_RENDERED,
-        38: ICON_RENDERED,
-        64: ICON_RENDERED,
-      },
-      tabId: tabId,
-    })
-    await updateHotKey(true)
-  } else {
+  const classicState = await messenger.tabs.sendMessage(tabId, {
+    action: "classic-state",
+  })
+  if (classicState === "rendered") {
+    await messenger.tabs.sendMessage(tabId, { action: "classic-restore" })
     await messenger.composeAction.setIcon({
       path: {
         16: ICON_INACTIVE,
@@ -467,7 +459,39 @@ async function doClassicRender(windowId) {
       tabId: tabId,
     })
     await updateHotKey(false)
+    return
   }
+
+  const composeDetails = await messenger.compose.getComposeDetails(tabId)
+  if (composeDetails.isPlainText) {
+    return
+  }
+  await messenger.tabs.sendMessage(tabId, { action: "request-preview" })
+  const renderedDocument = new DOMParser().parseFromString(
+    await messenger.runtime.sendMessage({
+      action: "cp.get-content",
+      windowId,
+    }),
+    "text/html",
+  )
+  if (!renderedDocument.body.innerHTML) {
+    throw new Error("Classic Markdown rendering returned empty content")
+  }
+  await messenger.tabs.sendMessage(tabId, {
+    action: "classic-render",
+    html: renderedDocument.body.innerHTML,
+  })
+  await messenger.composeAction.setIcon({
+    path: {
+      16: ICON_RENDERED,
+      19: ICON_RENDERED,
+      32: ICON_RENDERED,
+      38: ICON_RENDERED,
+      64: ICON_RENDERED,
+    },
+    tabId: tabId,
+  })
+  await updateHotKey(true)
 }
 
 async function toggleMDPreview(windowId) {
@@ -623,18 +647,19 @@ async function setModernMode(hidden) {
   })
   const wins = await getOpenComposeWindows()
   for (const win of wins) {
+    const tabId = win.tabs[0].id
+    const classicState = await messenger.tabs.sendMessage(tabId, {
+      action: "classic-state",
+    })
+    if (classicState === "rendered") {
+      await messenger.tabs.sendMessage(tabId, { action: "classic-restore" })
+    }
     await sendModeToComposeWindows([win], "cp.set-modern-mode", (message) =>
       messenger.runtime.sendMessage(message),
     )
     await messenger.composeAction.setIcon({
-      path: {
-        16: ICON_RENDERED,
-        19: ICON_RENDERED,
-        32: ICON_RENDERED,
-        38: ICON_RENDERED,
-        64: ICON_RENDERED,
-      },
-      tabId: win.tabs[0].id,
+      path: modernHidden ? ICON_INACTIVE : ICON_RENDERED,
+      tabId,
     })
     await updateHotKey(modernHidden)
     await messenger.menus.update("mdhr-reset-preview", { enabled: true })
@@ -735,6 +760,17 @@ async function updatePreviewRegistration(options) {
     getPreviewURL(),
     options,
   )
+}
+
+async function setModernPreviewDefault(enabled) {
+  const savedState = await OptionsStore.get(["mdhr-mode", "preview-width"])
+  if (savedState["mdhr-mode"] !== "modern") {
+    return
+  }
+  await updatePreviewRegistration({
+    width: toInt(savedState["preview-width"]),
+    hidden: !normalizeBoolean(enabled),
+  })
 }
 
 async function doStartup() {
