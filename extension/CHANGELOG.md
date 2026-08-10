@@ -1,5 +1,40 @@
 # Changelog
 
+## [4.0.24]
+
+### Fixed
+
+- Render the Theme settings preview inside the same
+  `.markdown-here-wrapper` used by actual messages, so the primary CSS from
+  v4.0.15 and user customizations correctly apply to fonts, text color, line
+  height, headings, quotes, tables, lists, and code blocks.
+- Use a stable light message canvas in the Theme preview while continuing to
+  apply every selectable syntax-highlighting theme to code content.
+
+### Changed
+
+- Replace the outdated Simplified and Traditional Chinese preview samples with
+  localized examples covering headings, quotes, lists, links, tables, code,
+  math, and horizontal rules.
+- Add regression coverage for the Theme preview structure and CSS target.
+
+Thanks to @mirenradia for reporting the Theme preview mismatch in
+https://github.com/vrpolice/markdown-here-revival/issues/2.
+
+### 中文
+
+- 主题设置页的预览现在使用与实际邮件相同的 `.markdown-here-wrapper`
+  结构，使 v4.0.15 的主要 CSS 及用户自定义样式能够正确作用于字体、文字
+  颜色、行高、标题、引用、表格、列表和代码块。
+- 主题预览使用稳定的浅色邮件画布，同时所有可选的语法高亮主题仍会正确
+  应用于代码内容。
+- 将过时的简体中文和繁体中文预览示例替换为本地化内容，覆盖标题、引用、
+  列表、链接、表格、代码、数学公式和分隔线。
+- 增加主题预览结构和 CSS 作用目标的回归测试。
+
+感谢 @mirenradia 在 https://github.com/vrpolice/markdown-here-revival/issues/2
+中反馈主题预览与实际邮件样式不一致的问题。
+
 ## [4.0.23]
 
 ### Fixed

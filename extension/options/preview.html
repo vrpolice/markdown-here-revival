@@ -5,16 +5,30 @@
   <title>MDHR Preview</title>
   <base target="_parent">
   <style>
+    html {
+        color-scheme: light;
+        background: #ffffff;
+    }
+
     html, body {
         height: 100%;
         width: calc(100% - 10px);
         margin: 0;
         padding: 5px;
     }
+
+    body {
+        background: #ffffff;
+    }
+
+    .markdown-here-wrapper {
+        min-height: 100%;
+    }
   </style>
   <style id="syntax_css"></style>
   <style id="main_css"></style>
 </head>
 <body>
+  <div class="markdown-here-wrapper"></div>
 </body>
 </html>

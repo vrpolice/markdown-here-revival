@@ -221,7 +221,10 @@ import OptionsStore from "./options-storage.js"
           previewIframe.contentDocument.createTextNode(response.syntax_css),
         )
 
-        previewIframe.contentDocument.body.innerHTML = escapeHTML`${response.html}`
+        const previewWrapper = previewIframe.contentDocument.querySelector(
+          ".markdown-here-wrapper",
+        )
+        previewWrapper.innerHTML = escapeHTML`${response.html}`
         setPreviewScroll()
       } catch (reason) {
         console.log(`Error rendering preview. ${reason}`)
