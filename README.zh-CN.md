@@ -1,4 +1,4 @@
-# <img src="extension/images/md_fucsia.svg" alt="MDHR Logo" height="24" width="24" align="bottom"> Markdown Here Revival — Thunderbird 128–153 Edition
+# <img src="extension/images/md_fucsia.svg" alt="MDHR Logo" height="24" width="24" align="bottom"> Markdown Here Revival — Thunderbird 128–154 Edition
 
 > :us: [English Version](README.md)
 
@@ -32,9 +32,9 @@ Markdown Here Revival 从 4.0.0 到 4.0.12 版本一直支持 Thunderbird 128–
 
 ### 第三代：本项目（2026–）
 
-Thunderbird 153 于 2026 年 7 月发布，是 Thunderbird 152 之后的下一个版本。第二代项目将 `strict_max_version` 限制在了 `150.*`，导致无法在 Thunderbird 151 及以上版本安装。
+Thunderbird 154 于 2026 年 8 月发布，是 Thunderbird 153 之后的下一个版本。第二代项目将 `strict_max_version` 限制在了 `150.*`，导致无法在 Thunderbird 151 及以上版本安装。
 
-本项目已更新版本兼容性以支持 **Thunderbird 151 至 153**，让有需要的用户能够继续使用。
+本项目已更新版本兼容性以支持 **Thunderbird 151 至 154**，让有需要的用户能够继续使用。
 
 ---
 
@@ -42,7 +42,8 @@ Thunderbird 153 于 2026 年 7 月发布，是 Thunderbird 152 之后的下一�
 
 | 扩展版本 | Thunderbird 版本 |
 |----------|-----------------|
-| 4.0.21+ | **128.0 – 153.\*** |
+| 4.0.25+ | **128.0 – 154.\*** |
+| 4.0.21 – 4.0.24 | 128.0 – 153.* |
 | 4.0.19 – 4.0.20 | 128.0 – 152.* |
 | 4.0.13 – 4.0.18 | 128.0 – 151.* |
 | 4.0.0 – 4.0.12 | 128.0 – 150.* |

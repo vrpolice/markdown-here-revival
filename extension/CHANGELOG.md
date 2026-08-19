@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.0.25]
+
+### Changed
+
+- Update Thunderbird compatibility metadata to allow installation on
+  Thunderbird 154 (`strict_max_version: 154.*`)
+- Update README and project website compatibility text for Thunderbird 128–154
+
+### 中文
+
+- 更新 Thunderbird 兼容性元数据，允许在 Thunderbird 154 上安装
+  （`strict_max_version: 154.*`）
+- 同步 README 和项目网页中的兼容范围说明到 Thunderbird 128–154
+
 ## [4.0.24]
 
 ### Fixed
