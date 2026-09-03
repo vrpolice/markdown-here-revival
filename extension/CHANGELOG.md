@@ -1,5 +1,31 @@
 # Changelog
 
+## [4.0.27]
+
+### Changed
+
+- Permit installation on Thunderbird 155 (`strict_max_version: 155.*`).
+- Update compatibility information across the README and project website to
+  Thunderbird 128–155.
+
+### 中文
+
+- 允许在 Thunderbird 155 上安装（`strict_max_version: 155.*`）。
+- 更新 README 与项目网站的兼容性信息至 Thunderbird 128–155。
+
+## [4.0.26]
+
+### Fixed
+
+- Prevent a send immediately after opening or editing a compose window from
+  failing while the live-preview iframe is still initializing. The extension
+  now requests a fresh render and briefly retries before cancelling a send.
+
+### 中文
+
+- 修复刚打开或编辑撰写窗口后立即发送时，实时预览 iframe 尚未初始化完成而
+  导致发送失败的问题。扩展现在会先请求重新渲染，并在取消发送前进行短暂重试。
+
 ## [4.0.25]
 
 ### Changed

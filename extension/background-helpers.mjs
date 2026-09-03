@@ -8,6 +8,35 @@ export function normalizeBoolean(value) {
   return Boolean(value)
 }
 
+export async function getRenderedContentWhenReady({
+  requestRender,
+  getRenderedContent,
+  wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  attempts = 5,
+  retryDelay = 250,
+}) {
+  let lastError
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      // The preview iframe is injected asynchronously for newly opened compose
+      // windows. Request a fresh render before reading it so a quick Send does
+      // not capture the initial, empty preview document.
+      await requestRender()
+      const body = await getRenderedContent()
+      if (body) {
+        return body
+      }
+      lastError = new Error("Rendered Markdown content was empty")
+    } catch (error) {
+      lastError = error
+    }
+    if (attempt + 1 < attempts) {
+      await wait(retryDelay)
+    }
+  }
+  throw lastError || new Error("Unable to retrieve rendered Markdown content")
+}
+
 export async function prepareBeforeSend({
   details,
   loadOptions,

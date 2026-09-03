@@ -4,6 +4,7 @@ import test from "node:test"
 import {
   normalizeBoolean,
   prepareBeforeSend,
+  getRenderedContentWhenReady,
   sendModeToComposeWindows,
   waitForNotificationResponse,
 } from "../../extension/background-helpers.mjs"
@@ -13,6 +14,38 @@ test("normalizeBoolean accepts stored booleans and legacy string booleans", () =
   assert.equal(normalizeBoolean(false), false)
   assert.equal(normalizeBoolean("true"), true)
   assert.equal(normalizeBoolean("false"), false)
+})
+
+test("getRenderedContentWhenReady refreshes and retries an initializing preview", async () => {
+  let renderRequests = 0
+  let reads = 0
+  const body = await getRenderedContentWhenReady({
+    requestRender: async () => {
+      renderRequests += 1
+    },
+    getRenderedContent: async () => {
+      reads += 1
+      return reads === 1 ? "" : "<p>Rendered</p>"
+    },
+    wait: async () => {},
+  })
+
+  assert.equal(body, "<p>Rendered</p>")
+  assert.equal(renderRequests, 2)
+})
+
+test("getRenderedContentWhenReady reports the last initialization error", async () => {
+  await assert.rejects(
+    getRenderedContentWhenReady({
+      requestRender: async () => {
+        throw new Error("preview frame unavailable")
+      },
+      getRenderedContent: async () => "<p>unused</p>",
+      wait: async () => {},
+      attempts: 2,
+    }),
+    /preview frame unavailable/,
+  )
 })
 
 test("prepareBeforeSend leaves plain text messages unchanged", async () => {

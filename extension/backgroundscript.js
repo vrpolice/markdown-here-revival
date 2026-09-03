@@ -11,6 +11,7 @@ import { getMessage, toInt } from "./async_utils.mjs"
 import {
   normalizeBoolean,
   prepareBeforeSend,
+  getRenderedContentWhenReady,
   sendModeToComposeWindows,
   waitForNotificationResponse,
 } from "./background-helpers.mjs"
@@ -372,14 +373,23 @@ messenger.compose.onBeforeSend.addListener(async function (tab, details) {
       return response === "ok"
     },
     getRenderedContent: () =>
-      withTimeout(
-        messenger.runtime.sendMessage({
-          action: "cp.get-content",
-          windowId: tab.windowId,
-        }),
-        5000,
-        "cp.get-content",
-      ),
+      getRenderedContentWhenReady({
+        requestRender: () =>
+          withTimeout(
+            messenger.tabs.sendMessage(tab.id, { action: "request-preview" }),
+            5000,
+            "request-preview",
+          ),
+        getRenderedContent: () =>
+          withTimeout(
+            messenger.runtime.sendMessage({
+              action: "cp.get-content",
+              windowId: tab.windowId,
+            }),
+            5000,
+            "cp.get-content",
+          ),
+      }),
     disableMutationListener: () =>
       withTimeout(
         messenger.runtime.sendMessage({ action: "disable-mutation-listener" }),
