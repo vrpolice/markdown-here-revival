@@ -127,7 +127,7 @@ messenger.runtime.sendMessage({ action: "compose-data" }).then((response) => {
     let mailBody = window.document.body
     let firstChild = mailBody.firstElementChild
     if (
-      firstChild.nodeName === "DIV" &&
+      firstChild?.nodeName === "DIV" &&
       firstChild.classList.contains("moz-cite-prefix")
     ) {
       let insertElem
@@ -149,7 +149,7 @@ async function looksLikeMarkdown(msgDocument) {
   }
   const content = msgDocument.body.cloneNode(true)
   for (const external of content.querySelectorAll(
-    ":scope > blockquote[type='cite'], :scope > .moz-signature, :scope > div.moz-forward-container, div.mdhr-raw",
+    "blockquote[type='cite'], .moz-signature, div.moz-forward-container, div.mdhr-raw",
   )) {
     external.remove()
   }

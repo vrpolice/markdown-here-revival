@@ -137,6 +137,18 @@ describe("MdhrMangle", function () {
 
       expect(msgDoc.querySelector("body > div.moz-forward-container")).to.be.null
     })
+
+    it("should exclude forwards nested by Thunderbird or a saved draft", async function() {
+      msgDoc = parser.parseFromString(
+        `<body><div class="compose-wrapper"># New content<div class="moz-forward-container">**Original content**</div></div></body>`,
+        "text/html",
+      )
+      const m = new MdhrMangle(msgDoc)
+      await m.excludeContent()
+
+      expect(msgDoc.querySelector("div.moz-forward-container")).to.be.null
+      expect(msgDoc.body.textContent).to.contain("# New content")
+    })
   })
 
   // Fix for https://github.com/adam-p/markdown-here/issues/104

@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.0.28]
+
+### Fixed
+
+- Preserve nested quoted and forwarded message content while rendering the new
+  Markdown text in forwarded compose windows, including saved or repeatedly
+  forwarded messages.
+- Avoid an initialization error when a forwarded compose window has an empty
+  message body.
+
+### 中文
+
+- 修复转发邮件撰写窗口中的 Markdown 渲染；对于草稿或多次转发产生的嵌套
+  引用结构，保留历史邮件原样，同时正常渲染新输入的 Markdown。
+- 避免转发邮件正文为空时发生初始化错误。
+
 ## [4.0.27]
 
 ### Changed

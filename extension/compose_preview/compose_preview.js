@@ -19,6 +19,7 @@ import { MdhrMangle } from "../mdhr-mangle.js"
 import { strToBase64 } from "../base64.js"
 import { markdownRender, resetMarked } from "../markdown-render.js"
 import { deduplicateRawMarkdownImages } from "../raw-markdown-images.mjs"
+import { findExternalContentRoots } from "../external-content.mjs"
 
 const STYLE_ELEM_IDS = ["MDHR_syntax_css", "MDHR_main_css"]
 const REMOVE_ELEM_IDS = ["MDHR_CSP", "MDHR_tb_style", "MDHR_preview_style"]
@@ -84,9 +85,7 @@ function makeStylesExplicit(html_msg) {
 }
 
 function wrapExternal(doc) {
-  const elements = doc.querySelectorAll(
-    "body > blockquote[type='cite'], body > div.moz-forward-container, body > .moz-signature",
-  )
+  const elements = findExternalContentRoots(doc)
   let i = 0
   for (const element of elements) {
     // Remove any "mdhr-raw" elements in replies to keep the size of the message reasonable.

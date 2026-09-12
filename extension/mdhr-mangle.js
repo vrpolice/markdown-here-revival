@@ -6,6 +6,7 @@
 
 import TurndownService from "./vendor/turndown.esm.js"
 import { degausser } from "./vendor/degausser.esm.js"
+import { findExternalContentRoots } from "./external-content.mjs"
 
 async function convertToText(elem) {
   if (messenger.messengerUtilities?.convertToPlainText === undefined) {
@@ -39,9 +40,13 @@ export class MdhrMangle {
       emojiDrop.remove()
     }
 
-    const excluded = this.doc.querySelectorAll(
-      "body > blockquote[type='cite'], body > .moz-signature, body > div.moz-forward-container, img, div.mdhr-raw",
-    )
+    const externalRoots = findExternalContentRoots(this.doc)
+    const excluded = [
+      ...externalRoots,
+      ...[...this.doc.querySelectorAll("img, div.mdhr-raw")].filter(
+        (element) => !externalRoots.some((root) => root.contains(element)),
+      ),
+    ]
     for (const e of excluded) {
       const excludeContent = e.outerHTML
       const placeholder = `${this.#placeholderPrefix}${this.#placeholderIndex++}`
