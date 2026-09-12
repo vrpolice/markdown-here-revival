@@ -21,6 +21,10 @@ import {
   getMessage,
 } from "../async_utils.mjs"
 import OptionsStore from "./options-storage.js"
+import {
+  findClickedLink,
+  getOptionsLinkAction,
+} from "./options-link-handler.mjs"
 ;(async () => {
   const hotkeyHandler = new HotkeyHandler("hotkey-input")
   const form = document.getElementById("mdh-options-form")
@@ -42,14 +46,15 @@ import OptionsStore from "./options-storage.js"
   }
 
   function link_onClicked(e) {
-    const elem = e.target
-    if (elem.localName !== "a") {
+    const elem = findClickedLink(e.target)
+    const action = getOptionsLinkAction(elem)
+    if (!action || action === "fragment") {
       return
     }
-    if (elem.protocol === "moz-extension:") {
+    if (action === "extension") {
       e.preventDefault()
       messenger.tabs.create({ url: elem.href })
-    } else if (elem.protocol === "https:" || elem.protocol === "http:") {
+    } else if (action === "external") {
       e.preventDefault()
       messenger.windows.openDefaultBrowser(elem.href)
     }

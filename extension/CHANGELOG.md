@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Prevent the settings sidebar from opening duplicate extension options tabs
+  when switching between its sections.
 - Preserve nested quoted and forwarded message content while rendering the new
   Markdown text in forwarded compose windows, including saved or repeatedly
   forwarded messages.
@@ -12,6 +14,7 @@
 
 ### 中文
 
+- 修复在设置页面切换不同栏目时，偶尔重复打开插件设置标签页的问题。
 - 修复转发邮件撰写窗口中的 Markdown 渲染；对于草稿或多次转发产生的嵌套
   引用结构，保留历史邮件原样，同时正常渲染新输入的 Markdown。
 - 避免转发邮件正文为空时发生初始化错误。
