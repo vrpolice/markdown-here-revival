@@ -1,4 +1,4 @@
-# <img src="extension/images/md_fucsia.svg" alt="MDHR Logo" height="24" width="24" align="bottom"> Markdown Here Revival — Thunderbird 128–155 Edition
+# <img src="extension/images/md_fucsia.svg" alt="MDHR Logo" height="24" width="24" align="bottom"> Markdown Here Revival — Thunderbird 128–156 Edition
 
 > :cn: [中文版本 (Chinese)](README.zh-CN.md)
 
@@ -35,9 +35,9 @@ Versions 4.0.0 through 4.0.12 supported Thunderbird 128–150.
 
 ### 3rd Gen: This Project (2026–)
 
-Thunderbird 155 shipped in September 2026 as the next release after Thunderbird 154. The upstream project's `strict_max_version` was capped at `150.*`, preventing installation on Thunderbird 151 and newer.
+Thunderbird 156 shipped on September 15, 2026. The upstream project's `strict_max_version` was capped at `150.*`, preventing installation on Thunderbird 151 and newer.
 
-This fork updates the extension compatibility for **Thunderbird 151 through 155**, keeping the tool alive for those who depend on it.
+This fork updates the extension compatibility for **Thunderbird 151 through 156**, keeping the tool alive for those who depend on it.
 
 ---
 
@@ -45,7 +45,8 @@ This fork updates the extension compatibility for **Thunderbird 151 through 155*
 
 | Extension version | Thunderbird version |
 |-------------------|---------------------|
-| 4.0.27+ | **128.0 – 155.\*** |
+| 4.0.29+ | **128.0 – 156.\*** |
+| 4.0.27 – 4.0.28 | 128.0 – 155.* |
 | 4.0.25 – 4.0.26 | 128.0 – 154.* |
 | 4.0.21 – 4.0.24 | 128.0 – 153.* |
 | 4.0.19 – 4.0.20 | 128.0 – 152.* |

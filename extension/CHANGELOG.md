@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.0.29]
+
+### Changed
+
+- Permit installation on Thunderbird 156 (`strict_max_version: 156.*`).
+- Update English and Chinese documentation and website compatibility information
+  to Thunderbird 128–156.
+
+### 中文
+
+- 更新兼容性配置，允许在 Thunderbird 156 上安装。
+- 同步中英文文档与项目网站的兼容范围至 Thunderbird 128–156。
+
 ## [4.0.28]
 
 ### Fixed
