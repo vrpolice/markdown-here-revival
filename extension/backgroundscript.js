@@ -144,6 +144,10 @@ messenger.runtime.onMessage.addListener(
       return Promise.resolve(["test-bg-request", "test-bg-request-ok"])
     } else if (request.action === "update-hotkey") {
       return updateHotKey(request.hotkey_value, request.hotkey_tooltip)
+    } else if (request.action === "compose-window") {
+      return messenger.tabs.get(sender.tab.id).then((tab) => ({
+        windowId: tab.windowId,
+      }))
     } else if (request.action === "compose-data") {
       return getComposeData(sender.tab)
     } else if (request.action === "mdhr-mode-set") {
@@ -374,12 +378,17 @@ messenger.compose.onBeforeSend.addListener(async function (tab, details) {
     },
     getRenderedContent: () =>
       getRenderedContentWhenReady({
-        requestRender: () =>
-          withTimeout(
+        requestRender: async () => {
+          const renderResponse = await withTimeout(
             messenger.tabs.sendMessage(tab.id, { action: "request-preview" }),
             5000,
             "request-preview",
-          ),
+          )
+          if (!renderResponse?.imageSessionId) {
+            throw new Error("Preview did not confirm rendering")
+          }
+          return renderResponse
+        },
         getRenderedContent: () =>
           withTimeout(
             messenger.runtime.sendMessage({
@@ -677,8 +686,10 @@ async function setModernMode(hidden) {
 }
 
 async function getComposeData(tab) {
+  const composeTab = await messenger.tabs.get(tab.id)
   const composeDetails = await messenger.compose.getComposeDetails(tab.id)
   const rv = {
+    windowId: composeTab.windowId,
     message_type: composeDetails.type,
     reply_position: null,
     use_paragraph: null,

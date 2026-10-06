@@ -16,6 +16,7 @@ let nextImageId = 0
 let previewSessionId = null
 
 let previewHidden = null
+let composeWindowId = null
 
 function requestHandler(request, sender, sendResponse) {
   if (request.action === "request-preview") {
@@ -122,26 +123,52 @@ function replaceEditorContents(html) {
   selection.addRange(caret)
 }
 
-messenger.runtime.sendMessage({ action: "compose-data" }).then((response) => {
-  if (response.reply_position === "bottom") {
-    let mailBody = window.document.body
-    let firstChild = mailBody.firstElementChild
-    if (
-      firstChild?.nodeName === "DIV" &&
-      firstChild.classList.contains("moz-cite-prefix")
-    ) {
-      let insertElem
-      if (response.use_paragraph) {
-        insertElem = window.document.createElement("p")
-        insertElem.appendChild(window.document.createElement("br"))
-      } else {
-        insertElem = window.document.createElement("br")
-      }
-      mailBody.insertAdjacentElement("afterbegin", insertElem)
+const composeWindowPromise = messenger.runtime
+  .sendMessage({ action: "compose-window" })
+  .then((response) => {
+    if (!Number.isInteger(response?.windowId)) {
+      throw new Error("Unable to identify the compose window")
     }
+    composeWindowId = response.windowId
+    return response
+  })
+
+messenger.runtime
+  .sendMessage({ action: "compose-data" })
+  .then(async (response) => {
+    if (response.reply_position === "bottom") {
+      let mailBody = window.document.body
+      let firstChild = mailBody.firstElementChild
+      if (
+        firstChild?.nodeName === "DIV" &&
+        firstChild.classList.contains("moz-cite-prefix")
+      ) {
+        let insertElem
+        if (response.use_paragraph) {
+          insertElem = window.document.createElement("p")
+          insertElem.appendChild(window.document.createElement("br"))
+        } else {
+          insertElem = window.document.createElement("br")
+        }
+        mailBody.insertAdjacentElement("afterbegin", insertElem)
+      }
+    }
+    await requestPreviewRender()
+  })
+  .catch((error) => console.error("Markdown Here reply formatting:", error))
+
+composeWindowPromise
+  .then(() => requestPreviewRender())
+  .catch((error) =>
+    console.error("Markdown Here preview initialization:", error),
+  )
+
+async function getComposeWindowId() {
+  if (Number.isInteger(composeWindowId)) {
+    return composeWindowId
   }
-  return requestPreviewRender().then()
-})
+  return (await composeWindowPromise).windowId
+}
 
 async function looksLikeMarkdown(msgDocument) {
   if (getClassicWrapper(msgDocument)) {
@@ -222,16 +249,18 @@ function createPreviewSnapshot() {
 }
 
 async function sendPreviewSnapshot() {
+  const windowId = await getComposeWindowId()
   const snapshot = createPreviewSnapshot()
   const response = await messenger.runtime.sendMessage({
     action: "cp.render-preview",
+    windowId,
     doc_html: snapshot.docHTML,
     image_ids: snapshot.imageIds,
     image_sources: snapshot.imageSources,
   })
 
   if (!response?.imageSessionId) {
-    return
+    return undefined
   }
 
   previewSessionId = response.imageSessionId
@@ -251,6 +280,7 @@ async function sendPreviewSnapshot() {
   if (response.missingImageIds?.length > 0) {
     requestPreviewRender()
   }
+  return response
 }
 
 const requestPreviewRender =

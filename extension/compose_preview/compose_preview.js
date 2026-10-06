@@ -33,6 +33,20 @@ const PREVIEW_IMAGE_ID_ATTRIBUTE = "data-mdhr-preview-image-id"
 const imageSessionId = crypto.randomUUID()
 const previewImageCache = new Map()
 
+function showPreviewError(error) {
+  let status = document.getElementById("mdhr-preview-error")
+  if (!status) {
+    status = document.createElement("pre")
+    status.id = "mdhr-preview-error"
+    status.setAttribute("role", "alert")
+    status.style.cssText =
+      "position:absolute;inset:0 auto auto 0;max-width:100%;box-sizing:border-box;padding:12px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere;background:Canvas;color:CanvasText;z-index:1"
+    document.body.prepend(status)
+  }
+  status.textContent = `Markdown Here Revival: ${error?.message || String(error)}`
+  console.error("Markdown Here preview:", error)
+}
+
 function escapeHTML(strings, html) {
   return `${DOMPurify.sanitize(html)}`
 }
@@ -135,6 +149,7 @@ function restorePreviewImages(doc, imageIds, imageSources) {
 
 async function renderMDEmail(msg_html, imageIds, imageSources) {
   /* cp.render-preview */
+  await previewReady
   const msgDocument = parseHTMLFromString(msg_html)
   const mdHtmlToText = new MdhrMangle(msgDocument)
   const mdText = await mdHtmlToText.preprocess()
@@ -351,19 +366,22 @@ async function loadIFrame() {
       `<style id="MDHR_main_css">${main_css}</style>`,
     )
   const doc = parseHTMLFromString(srcdoc)
+  const loaded = new Promise((resolve) => {
+    p_iframe.addEventListener("load", resolve, { once: true })
+  })
   p_iframe.srcdoc = `<!DOCTYPE html>\n${doc.documentElement.outerHTML}`
+  await loaded
 }
 
-;(async () => {
-  loadIFrame()
-    .then(async () => {
-      await previewFrameLoaded()
-    })
-    .then(async () => {
-      cssInliner = new CSSInliner()
-    })
+const previewReady = (async () => {
+  await loadIFrame()
+  await resetMarked()
+  await previewFrameLoaded()
+  cssInliner = new CSSInliner()
 })()
-await resetMarked()
+previewReady.catch(showPreviewError)
+
+const previewContext = await messenger.ex_customui.getContext()
 
 messenger.runtime.onMessage.addListener(
   function (request, sender, responseCallback) {
@@ -381,55 +399,69 @@ messenger.runtime.onMessage.addListener(
     if (!request.action.startsWith("cp.")) {
       return false
     }
-    return messenger.ex_customui.getContext().then((context) => {
-      if (context.windowType !== "messageCompose") {
-        return false
-      }
-      switch (request.action) {
-        case "cp.render-preview":
-          if (sender.tab.windowId !== context.windowId) {
-            return false
-          }
-          return renderMDEmail(
-            request.doc_html,
-            request.image_ids,
-            request.image_sources,
-          )
-        case "cp.renderer-reset":
-          return resetMarked()
-        case "cp.toggle-preview":
-          if (request.windowId !== context.windowId) {
-            return false
-          }
-          return togglePreview(request.windowId)
-        case "cp.disableForPlainText":
-          if (request.windowId !== context.windowId) {
-            return false
-          }
-          return disableForPlainText(request.windowId)
-        case "cp.get-content":
-          if (request.windowId !== context.windowId) {
-            return false
-          }
-          return getMsgContent()
-        case "cp.scroll-to":
-          if (sender.tab.windowId !== context.windowId) {
-            return false
-          }
-          return scrollTo(request.payload)
-        case "cp.set-classic-mode":
-          if (request.windowId !== context.windowId) {
-            return false
-          }
-          return setClassicMode()
-        case "cp.set-modern-mode":
-          if (request.windowId !== context.windowId) {
-            return false
-          }
-          return setModernMode()
-        default:
-          console.log(`Compose Preview: invalid action: ${request.action}`)
-      }
-    })
+    const context = previewContext
+    const targetWindowId = request.windowId ?? sender.tab?.windowId
+    if (
+      request.action !== "cp.renderer-reset" &&
+      targetWindowId !== context.windowId
+    ) {
+      return false
+    }
+    if (context.windowType !== "messageCompose") {
+      return false
+    }
+    switch (request.action) {
+      case "cp.render-preview":
+        if (request.windowId !== context.windowId) {
+          return false
+        }
+        return renderMDEmail(
+          request.doc_html,
+          request.image_ids,
+          request.image_sources,
+        )
+          .then((response) => {
+            document.getElementById("mdhr-preview-error")?.remove()
+            return response
+          })
+          .catch((error) => {
+            showPreviewError(error)
+            throw error
+          })
+      case "cp.renderer-reset":
+        return resetMarked()
+      case "cp.toggle-preview":
+        if (request.windowId !== context.windowId) {
+          return false
+        }
+        return togglePreview(request.windowId)
+      case "cp.disableForPlainText":
+        if (request.windowId !== context.windowId) {
+          return false
+        }
+        return disableForPlainText(request.windowId)
+      case "cp.get-content":
+        if (request.windowId !== context.windowId) {
+          return false
+        }
+        return getMsgContent()
+      case "cp.scroll-to":
+        if (sender.tab.windowId !== context.windowId) {
+          return false
+        }
+        return scrollTo(request.payload)
+      case "cp.set-classic-mode":
+        if (request.windowId !== context.windowId) {
+          return false
+        }
+        return setClassicMode()
+      case "cp.set-modern-mode":
+        if (request.windowId !== context.windowId) {
+          return false
+        }
+        return setModernMode()
+      default:
+        console.log(`Compose Preview: invalid action: ${request.action}`)
+    }
   },
 )

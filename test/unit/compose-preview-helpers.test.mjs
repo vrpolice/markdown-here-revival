@@ -22,6 +22,7 @@ test("latest task runner coalesces updates while rendering", async () => {
         releaseFirstRun = resolve
       })
     }
+    return callCount
   })
 
   const firstRun = runner()
@@ -29,9 +30,10 @@ test("latest task runner coalesces updates while rendering", async () => {
   const secondRun = runner()
   const thirdRun = runner()
   releaseFirstRun()
-  await Promise.all([firstRun, secondRun, thirdRun])
+  const results = await Promise.all([firstRun, secondRun, thirdRun])
 
   assert.equal(callCount, 2)
+  assert.deepEqual(results, [2, 2, 2])
 })
 
 test("trailing debounce renders only the latest update", async () => {

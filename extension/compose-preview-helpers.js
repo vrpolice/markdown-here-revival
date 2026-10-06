@@ -17,10 +17,12 @@ globalThis.MdhrPreviewHelpers = (() => {
       }
 
       activeTask = (async () => {
+        let result
         do {
           rerunRequested = false
-          await task()
+          result = await task()
         } while (rerunRequested)
+        return result
       })()
 
       try {

@@ -8,11 +8,29 @@
 - Verify the Experiment API compose-window integration against Thunderbird
   157.0.1 and update English and Chinese compatibility documentation.
 
+### Fixed
+
+- Keep preview updates independent of reply-format preferences and ignore other
+  compose windows synchronously to avoid competing message responses.
+- Wait for the preview iframe to finish loading before rendering reply text and
+  quoted content, and resolve the compose window from the current tab.
+- Route live-preview rendering explicitly to its compose window and require a
+  render acknowledgement before sending, preventing reply messages from being
+  blocked by an empty preview response.
+- Display preview initialization and rendering errors in the preview pane.
+- Thanks to @yhager for reporting issue #5 and @mirenradia for additional feedback.
+
 ### 中文
 
 - 将兼容性上限提升至 Thunderbird 160（`strict_max_version: 160.*`）。
 - 已核对 Thunderbird 157.0.1 的 Experiment API 撰写窗口集成，并同步更新
   中英文兼容性说明。
+- 预览更新不再依赖回复格式设置查询；其他撰写窗口同步忽略不属于自己的消息，避免响应串扰。
+- 等待预览页面加载完成后再渲染回复正文和引用内容，并从当前标签页获取撰写窗口。
+- 将实时预览渲染明确路由至对应的撰写窗口，并在发送前要求渲染完成确认，避免
+  回复邮件因预览返回空内容而被错误阻止发送。
+- 预览初始化或渲染失败时，在预览区域显示具体错误。
+- 感谢 @yhager 提交 issue #5，以及 @mirenradia 提供补充反馈。
 
 ## [4.0.29]
 
