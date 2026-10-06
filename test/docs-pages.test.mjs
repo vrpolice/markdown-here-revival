@@ -31,10 +31,10 @@ test("English and Chinese landing pages share the bilingual site contract", asyn
   assert.doesNotMatch(css, /linear-gradient\([^)]*#d946ef/)
   assert.equal(
     manifestJson.browser_specific_settings.gecko.strict_max_version,
-    "156.*",
+    "160.*",
   )
-  assert.match(english, /128–156/)
-  assert.match(chinese, /128–156/)
-  assert.match(readme, /Thunderbird 156/)
-  assert.match(readmeZh, /Thunderbird 156/)
+  assert.match(english, /128–160/)
+  assert.match(chinese, /128–160/)
+  assert.match(readme, /Thunderbird 160/)
+  assert.match(readmeZh, /Thunderbird 160/)
 })

@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.0.30]
+
+### Changed
+
+- Declare compatibility through Thunderbird 160 (`strict_max_version: 160.*`).
+- Verify the Experiment API compose-window integration against Thunderbird
+  157.0.1 and update English and Chinese compatibility documentation.
+
+### 中文
+
+- 将兼容性上限提升至 Thunderbird 160（`strict_max_version: 160.*`）。
+- 已核对 Thunderbird 157.0.1 的 Experiment API 撰写窗口集成，并同步更新
+  中英文兼容性说明。
+
 ## [4.0.29]
 
 ### Changed
