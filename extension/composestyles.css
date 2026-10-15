@@ -4,6 +4,10 @@
  */
 
 /* Override paragraph margins in compose window. */
+body {
+    overflow-wrap: break-word;
+}
+
 p {
     margin-block-start: .4em;
     margin-block-end: .4em;

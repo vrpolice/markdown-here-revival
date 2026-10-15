@@ -46,6 +46,7 @@ export async function prepareBeforeSend({
   confirmUnrenderedSend,
   getRenderedContent,
   disableMutationListener,
+  applyRenderedContent,
   reportRenderFailure,
 }) {
   if (details.isPlainText) {
@@ -82,6 +83,10 @@ export async function prepareBeforeSend({
       } catch {
         // The message body is already captured, so observer cleanup is non-critical.
       }
+    }
+    if (applyRenderedContent) {
+      await applyRenderedContent(body)
+      return { cancel: false }
     }
     return {
       cancel: false,

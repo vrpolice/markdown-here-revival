@@ -51,6 +51,7 @@ function requestHandler(request, sender, sendResponse) {
     return Promise.resolve(window.document.documentElement.outerHTML)
   } else if (request.action === "disable-mutation-listener") {
     MsgMutationObserver.disconnect()
+    debouncedRenderPreview.cancel()
   }
   return Promise.resolve("okay")
 }

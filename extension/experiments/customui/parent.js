@@ -18,6 +18,87 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
     const XULNS =
         "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
+    // IMAP copies can finish with UID 0. Thunderbird then tries to fetch an
+    // invalid header even when there are no outgoing rules to run.
+    try {
+      const { MessageSend } = ChromeUtils.importESModule(
+        "resource:///modules/MessageSend.sys.mjs"
+      );
+      const prototype = MessageSend.prototype;
+      const { MailUtils } = ChromeUtils.importESModule(
+        "resource:///modules/MailUtils.sys.mjs"
+      );
+      const compatibilityScope = {};
+      Services.scriptloader.loadSubScript(
+        // Privileged script loading requires the physical file/jar URI,
+        // not the public moz-extension URL used by extension pages.
+        context.extension.rootURI.resolve("experiments/customui/send-compatibility.js"),
+        compatibilityScope
+      );
+      if (!prototype._mdhrFilterDiagnostics) {
+        const originalFilter = prototype._filterSentMessage;
+        const originalStop = prototype.onStopOperation;
+        const diagnosticFilter = function(...args) {
+          if (this._parentWindow?.document.getElementById("customui-editor-wrapper") &&
+              this._messageKey === 0) {
+            try {
+              const folder = MailUtils.getExistingFolder(this._folderUri);
+              if (compatibilityScope.MdhrSendCompatibility.canFinishWithoutFiltering({
+                messageKey: this._messageKey,
+                folder,
+                postOutgoingType: Ci.nsMsgFilterType.PostOutgoing,
+              })) {
+                // No filters need a header. Complete via Thunderbird's normal
+                // callback so additional FCC copies and cleanup still run.
+                this.sendReport.currentProcess = Ci.nsIMsgSendReport.process_Filter;
+                return this.onStopOperation(Cr.NS_OK);
+              }
+            } catch (error) {
+              console.warn("MDHR outgoing filter compatibility check failed", error);
+            }
+          }
+          try {
+            return originalFilter.apply(this, args);
+          } catch (error) {
+            console.error("MDHR post-send filter exception", {
+              name: error.name,
+              message: error.message,
+              result: error.result,
+              stack: error.stack,
+              messageKey: this._messageKey,
+              deliverMode: this._deliverMode,
+            });
+            throw error;
+          }
+        };
+        const diagnosticStop = function(status, ...args) {
+          if (!Components.isSuccessCode(status)) {
+            console.error("MDHR post-send filter status", {
+              status,
+              messageKey: this._messageKey,
+              deliverMode: this._deliverMode,
+            });
+          }
+          return originalStop.call(this, status, ...args);
+        };
+        prototype._filterSentMessage = diagnosticFilter;
+        prototype.onStopOperation = diagnosticStop;
+        prototype._mdhrFilterDiagnostics = true;
+        console.info("MDHR outgoing filter compatibility enabled");
+        context.callOnClose({ close() {
+          if (prototype._filterSentMessage === diagnosticFilter) {
+            prototype._filterSentMessage = originalFilter;
+          }
+          if (prototype.onStopOperation === diagnosticStop) {
+            prototype.onStopOperation = originalStop;
+          }
+          delete prototype._mdhrFilterDiagnostics;
+        }});
+      }
+    } catch (error) {
+      console.warn("MDHR filter diagnostics unavailable", error);
+    }
+
     // Window monitoring helper ===============================================
     // This permits monitoring of all kinds of windows, including those in
     // iframes. Registered listeners are called for all loaded windows.
@@ -490,10 +571,10 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
           if (!editor_wrapper) {
             editor_wrapper = window.document.createElement("div")
             editor_wrapper.id = editorWrapperId
-            editor_wrapper.style = "display: flex; height: 100%; width: 100%"
+            editor_wrapper.style = "display: flex; height: 100%; width: 100%; min-width: 0;"
             const editor_column = window.document.createElement("div")
             editor_column.id = "customui-editor-col"
-            editor_column.style = "display: flex; flex-direction: column; flex-grow: 1; flex-shrink: 1;"
+            editor_column.style = "display: flex; flex-direction: column; flex-grow: 1; flex-shrink: 1; min-width: 0;"
             editor_wrapper.appendChild(editor_column)
             const editor_elem = window.document.getElementById("messageEditor");
             if (!editor_elem) {

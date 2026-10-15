@@ -401,10 +401,28 @@ messenger.compose.onBeforeSend.addListener(async function (tab, details) {
       }),
     disableMutationListener: () =>
       withTimeout(
-        messenger.runtime.sendMessage({ action: "disable-mutation-listener" }),
+        messenger.tabs.sendMessage(tab.id, {
+          action: "disable-mutation-listener",
+        }),
         2000,
         "disable-mutation-listener",
       ),
+    applyRenderedContent: async (html) => {
+      // Updating details.body makes Thunderbird rebuild the editor document.
+      // Keep the live editor intact, as classic rendering does, so its command
+      // controller and send/save lifecycle retain their existing document.
+      const renderedDocument = new DOMParser().parseFromString(
+        html,
+        "text/html",
+      )
+      const response = await messenger.tabs.sendMessage(tab.id, {
+        action: "classic-render",
+        html: renderedDocument.body.innerHTML,
+      })
+      if (response !== "rendered") {
+        throw new Error("Compose editor did not confirm rendered content")
+      }
+    },
     reportRenderFailure,
   })
 })

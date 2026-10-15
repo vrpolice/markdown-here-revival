@@ -16,6 +16,31 @@ test("normalizeBoolean accepts stored booleans and legacy string booleans", () =
   assert.equal(normalizeBoolean("false"), false)
 })
 
+test("sending through the editor applies HTML after stopping preview updates without rebuilding the document", async () => {
+  const calls = []
+  const result = await prepareBeforeSend({
+    details: { isPlainText: false },
+    markdownEnabled: true,
+    getRenderedContent: async () => "<p>Rendered</p>",
+    disableMutationListener: async () => calls.push("stop"),
+    applyRenderedContent: async (body) => calls.push(body),
+  })
+  assert.deepEqual(calls, ["stop", "<p>Rendered</p>"])
+  assert.deepEqual(result, { cancel: false })
+})
+
+test("sending is cancelled if inserting rendered content into the editor fails", async () => {
+  const result = await prepareBeforeSend({
+    details: { isPlainText: false },
+    markdownEnabled: true,
+    getRenderedContent: async () => "<p>Rendered</p>",
+    applyRenderedContent: async () => {
+      throw new Error("Editor unavailable")
+    },
+  })
+  assert.deepEqual(result, { cancel: true })
+})
+
 test("getRenderedContentWhenReady refreshes and retries an initializing preview", async () => {
   let renderRequests = 0
   let reads = 0

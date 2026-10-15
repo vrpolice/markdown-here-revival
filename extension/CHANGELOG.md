@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.0.31]
+
+### Fixed
+
+- Handle IMAP sent copies reporting UID 0 without reading an invalid message
+  header when no enabled post-outgoing filters exist. Preserve normal filtering
+  for actual rules and complete secondary sent copies through the normal callback.
+- Load the privileged compatibility helper from the extension's physical file/jar
+  root and log successful initialization.
+- Insert modern-mode rendered content into the existing editor instead of
+  rebuilding its document, and stop pending preview updates before sending.
+- Allow the modern-mode editor column to shrink and wrap long unbroken words.
+
+### 中文
+
+- 修复 IMAP 发送副本返回 UID 0 时读取无效邮件记录的问题：没有启用的发送后
+  规则时正常完成处理；有实际规则时仍保留正常过滤流程。
+- 使用扩展实际 file/jar 路径加载兼容脚本，并记录初始化成功信息。
+- 现代模式发送时在现有编辑器内插入渲染内容，并停止待执行的预览更新。
+- 修复现代模式编辑栏无法收缩及长词不换行的问题。
+
 ## [4.0.30]
 
 ### Changed
