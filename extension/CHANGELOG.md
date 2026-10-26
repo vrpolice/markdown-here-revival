@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.0.32]
+
+### Fixed
+
+- Inline the IMAP send compatibility helper in the Experiment API implementation.
+  Thunderbird rejected both public extension URLs and physical jar URLs passed
+  to loadSubScript, preventing the v4.0.31 compatibility hook from initializing.
+- Test initialization with a script loader that rejects all external scripts.
+
+### 中文
+
+- 将 IMAP 发送兼容函数直接放入实验 API 实现文件，移除被 Thunderbird 安全限制
+  拒绝的额外脚本加载，修正 v4.0.31 的兼容处理无法初始化的问题。
+- 增加拒绝所有外部脚本加载情况下的初始化测试。
+
 ## [4.0.31]
 
 ### Fixed

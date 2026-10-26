@@ -4,28 +4,16 @@ import vm from "node:vm"
 import test from "node:test"
 
 const scope = {}
-vm.runInNewContext(
-  await readFile(
-    new URL(
-      "../../extension/experiments/customui/send-compatibility.js",
-      import.meta.url,
-    ),
-    "utf8",
-  ),
-  scope,
+const parentSource = await readFile(
+  new URL("../../extension/experiments/customui/parent.js", import.meta.url),
+  "utf8",
 )
+vm.runInNewContext(parentSource.split("var ex_customui")[0], scope)
 const { canFinishWithoutFiltering } = scope.MdhrSendCompatibility
 
-test("privileged initialization loads from the physical root and installs a working reversible hook", async () => {
+test("privileged initialization needs no external script loading and installs a working reversible hook", async () => {
   const source = await readFile(
     new URL("../../extension/experiments/customui/parent.js", import.meta.url),
-    "utf8",
-  )
-  const helper = await readFile(
-    new URL(
-      "../../extension/experiments/customui/send-compatibility.js",
-      import.meta.url,
-    ),
     "utf8",
   )
   class MessageSend {}
@@ -50,9 +38,8 @@ test("privileged initialization loads from the physical root and installs a work
     },
     Services: {
       scriptloader: {
-        loadSubScript: (url, target) => {
-          assert.match(url, /^jar:file:/)
-          vm.runInNewContext(helper, target)
+        loadSubScript: () => {
+          throw new Error("Trying to load untrusted URI")
         },
       },
     },

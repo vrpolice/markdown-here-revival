@@ -1,3 +1,25 @@
+/* Thunderbird IMAP UID 0 cannot identify a saved message. */
+var MdhrSendCompatibility = {
+  canFinishWithoutFiltering({ messageKey, folder, postOutgoingType }) {
+    if (messageKey !== 0 || folder?.server?.type !== "imap") {
+      return false;
+    }
+    try {
+      const filters = folder.getFilterList(null);
+      for (let index = 0; index < filters.filterCount; index++) {
+        const filter = filters.getFilterAt(index);
+        if (filter.enabled && (filter.filterType & postOutgoingType)) {
+          return false;
+        }
+      }
+      return true;
+    } catch {
+      // An unreadable rule list is not equivalent to an empty rule list.
+      return false;
+    }
+  },
+};
+
 var ex_customui = class extends ExtensionCommon.ExtensionAPI {
   getAPI(context) {
     const { ExtensionParent } = ChromeUtils.importESModule(
@@ -28,13 +50,6 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
       const { MailUtils } = ChromeUtils.importESModule(
         "resource:///modules/MailUtils.sys.mjs"
       );
-      const compatibilityScope = {};
-      Services.scriptloader.loadSubScript(
-        // Privileged script loading requires the physical file/jar URI,
-        // not the public moz-extension URL used by extension pages.
-        context.extension.rootURI.resolve("experiments/customui/send-compatibility.js"),
-        compatibilityScope
-      );
       if (!prototype._mdhrFilterDiagnostics) {
         const originalFilter = prototype._filterSentMessage;
         const originalStop = prototype.onStopOperation;
@@ -43,7 +58,7 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
               this._messageKey === 0) {
             try {
               const folder = MailUtils.getExistingFolder(this._folderUri);
-              if (compatibilityScope.MdhrSendCompatibility.canFinishWithoutFiltering({
+              if (MdhrSendCompatibility.canFinishWithoutFiltering({
                 messageKey: this._messageKey,
                 folder,
                 postOutgoingType: Ci.nsMsgFilterType.PostOutgoing,
