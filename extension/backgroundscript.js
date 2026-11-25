@@ -16,8 +16,8 @@ import {
   waitForNotificationResponse,
 } from "./background-helpers.mjs"
 import {
-  RAW_IMAGE_ID_ATTRIBUTE,
   restoreRawMarkdownImages,
+  restoreUnmarkedInlineImages,
 } from "./raw-markdown-images.mjs"
 import { createInlineImageResolver } from "./message-inline-images.mjs"
 import OptionsStore from "./options/options-storage.js"
@@ -222,28 +222,34 @@ function fileToDataURL(file) {
 }
 
 async function loadOldMarkdown(bodyHTML, resolveImageSource) {
+  async function resolveImage(source, context) {
+    try {
+      return await resolveImageSource(source, context)
+    } catch (error) {
+      console.error("Could not restore an inline Markdown image", error)
+      return source
+    }
+  }
   const mailDocument = new DOMParser().parseFromString(bodyHTML, "text/html")
-  const rawMDHR = mailDocument.body.querySelectorAll(".mdhr-raw")
+  const rawMDHR = [
+    ...mailDocument.body.querySelectorAll('.mdhr-raw[title^="MDH:"]'),
+  ].filter(
+    (holder) =>
+      !holder.closest("blockquote, .moz-forward-container, .moz-signature"),
+  )
   if (rawMDHR.length === 1) {
     const data = rawMDHR[0].title.substring(4)
     const rawHTML = base64ToStr(data)
-    if (!rawHTML.includes(RAW_IMAGE_ID_ATTRIBUTE)) {
-      return rawHTML
-    }
     const rawDocument = new DOMParser().parseFromString(rawHTML, "text/html")
-    await restoreRawMarkdownImages(
-      rawDocument,
-      mailDocument,
-      async (source, context) => {
-        try {
-          return await resolveImageSource(source, context)
-        } catch (error) {
-          console.error("Could not restore an inline Markdown image", error)
-          return source
-        }
-      },
-    )
+    await restoreRawMarkdownImages(rawDocument, mailDocument, resolveImage)
+    await restoreUnmarkedInlineImages(rawDocument, resolveImage, mailDocument)
     return rawDocument.body.innerHTML
+  }
+  if (
+    rawMDHR.length === 0 &&
+    (await restoreUnmarkedInlineImages(mailDocument, resolveImage))
+  ) {
+    return mailDocument.body.innerHTML
   }
 }
 
@@ -251,6 +257,9 @@ messenger.menus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === menu_edit_markdown_id) {
     for (const msgHeader of info.selectedMessages.messages) {
       const messageId = msgHeader.id
+      if (await messenger.ex_customui.editDraft(messageId)) {
+        continue
+      }
       let details = {}
       const attachments = await messenger.messages.listAttachments(messageId)
       const resolveImageSource = createInlineImageResolver({
@@ -262,10 +271,11 @@ messenger.menus.onClicked.addListener(async (info, tab) => {
       const textParts = await messenger.messages.listInlineTextParts(messageId)
       for (const part of textParts) {
         if (part.contentType === "text/html") {
-          details["body"] = await loadOldMarkdown(
-            part.content,
-            resolveImageSource,
-          )
+          const body = await loadOldMarkdown(part.content, resolveImageSource)
+          if (body !== undefined) {
+            details.body = body
+            break
+          }
         }
       }
       await messenger.compose.beginNew(messageId, details)
@@ -273,16 +283,13 @@ messenger.menus.onClicked.addListener(async (info, tab) => {
   }
 })
 
-async function resetModernMode(preview = true, width = true) {
-  const saved = await saveComposed()
-  await unInjectMDPreview()
+async function resetModernMode() {
   await OptionsStore.set({
     "mdhr-mode": "modern",
     "enable-markdown-mode": true,
     "preview-width": 0,
   })
   await injectMDPreview()
-  await restoreComposed(saved)
 }
 
 // Mail Extensions are not able to add composeScripts via manifest.json,
@@ -720,36 +727,7 @@ async function getComposeData(tab) {
   return rv
 }
 
-async function saveComposed() {
-  const rv = []
-  const wins = await getOpenComposeWindows()
-  let win
-  for (win of wins) {
-    const tabId = win.tabs[0].id
-    const savedMsgHdrs = await messenger.compose.saveMessage(tabId, {
-      mode: "draft",
-    })
-    /*const details = {
-      id: win.id,
-      tabId: tabId,
-      details: await messenger.compose.getComposeDetails(tabId),
-    }*/
-    rv.push(...savedMsgHdrs.messages)
-    await messenger.windows.remove(win.id)
-  }
-  return rv
-}
-
-async function restoreComposed(msgHeaderList) {
-  let msgHeaders
-  for (msgHeaders of msgHeaderList) {
-    await messenger.compose.beginNew(msgHeaders.id)
-  }
-}
-
 async function injectMDPreview() {
-  // Save state of open compose Windows as drafts
-  const saved = await saveComposed()
   // Register custom UI compose editor
   const savedState = await OptionsStore.get([
     "mdhr-mode",
@@ -769,24 +747,34 @@ async function injectMDPreview() {
   } else {
     options["hidden"] = true
   }
-  await messenger.ex_customui.add(
-    messenger.ex_customui.LOCATION_COMPOSE_EDITOR,
-    getPreviewURL(),
-    options,
-  )
-  // Restore the saved drafts
-  await restoreComposed(saved)
-}
-
-async function unInjectMDPreview() {
-  // Save state of open compose Windows as drafts
-  const saved = await saveComposed()
-  await messenger.ex_customui.remove(
-    messenger.ex_customui.LOCATION_COMPOSE_EDITOR,
-    getPreviewURL(),
-  )
-  // Restore the saved drafts
-  await restoreComposed(saved)
+  const closedDrafts = []
+  try {
+    for (const win of await getOpenComposeWindows()) {
+      const { messages } = await messenger.compose.saveMessage(win.tabs[0].id, {
+        mode: "draft",
+      })
+      if (messages?.length !== 1 || !Number.isInteger(messages[0].id)) {
+        throw new Error("Could not identify the saved draft")
+      }
+      await messenger.windows.remove(win.id)
+      closedDrafts.push(messages[0].id)
+    }
+    await messenger.ex_customui.add(
+      messenger.ex_customui.LOCATION_COMPOSE_EDITOR,
+      getPreviewURL(),
+      options,
+    )
+  } finally {
+    for (const id of closedDrafts) {
+      try {
+        if (!(await messenger.ex_customui.editDraft(id))) {
+          throw new Error("Saved message is outside a drafts folder")
+        }
+      } catch (error) {
+        console.error("Markdown Here could not reopen saved draft", id, error)
+      }
+    }
+  }
 }
 
 function getPreviewURL() {

@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.0.33]
+
+- Declare compatibility through Thunderbird 170. The compose editor and send
+  methods were checked against the installed Thunderbird 161.0 source.
+- Install the IMAP send hook only when both native methods exist. Use native
+  filtering when the rule count is unavailable.
+- Open messages in Drafts with Thunderbird's draft editor from the Markdown
+  menu and when restoring compose windows. This preserves draft identity and
+  lets Thunderbird load HTML signatures and inline attachments together.
+- Restore embedded signature images from the sent message when re-editing it,
+  including images without extension markers. Preserve existing HTML tables
+  in the preview so table-based signature cards retain their layout.
+- Recognize AliMail signature blocks and restore CID-linked raster images
+  labelled as generic binary attachments by checking their file headers.
+
+### 中文
+
+- 将声明的安装上限提高至 Thunderbird 170。已对照本机 Thunderbird 161.0 源码核对撰写窗口和发送接口。
+- 仅在两个原生发送方法均可用时安装 IMAP 兼容钩子。无法读取规则数量时使用原生过滤流程。
+- 在草稿箱使用 Markdown 右键菜单或恢复撰写窗口时，使用 Thunderbird 的草稿编辑器打开原件，由它一并载入 HTML 签名和内嵌附件。
+- 重新编辑已发送邮件时，从原邮件恢复没有插件图片标记的内嵌签名图片；预览保留签名名片的 HTML 表格布局。
+- 保留阿里邮箱签名块的 HTML 样式，并按文件头识别标为通用二进制附件的内嵌签名图片。
+
 ## [4.0.32]
 
 ### Fixed

@@ -1,9 +1,12 @@
 export const EXTERNAL_CONTENT_SELECTOR =
-  "blockquote[type='cite'], .moz-signature, div.moz-forward-container"
+  "blockquote[type='cite'], .moz-signature, .alimail-signature, div.moz-forward-container, div.mdhr-html-table"
 
-export function findExternalContentRoots(doc) {
-  const candidates = [...doc.body.querySelectorAll(EXTERNAL_CONTENT_SELECTOR)]
+export function findExternalContentRoots(
+  doc,
+  selector = EXTERNAL_CONTENT_SELECTOR,
+) {
+  const candidates = [...doc.body.querySelectorAll(selector)]
   return candidates.filter(
-    (element) => !element.parentElement?.closest(EXTERNAL_CONTENT_SELECTOR),
+    (element) => !element.parentElement?.closest(selector),
   )
 }

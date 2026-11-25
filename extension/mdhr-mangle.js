@@ -6,7 +6,10 @@
 
 import TurndownService from "./vendor/turndown.esm.js"
 import { degausser } from "./vendor/degausser.esm.js"
-import { findExternalContentRoots } from "./external-content.mjs"
+import {
+  EXTERNAL_CONTENT_SELECTOR,
+  findExternalContentRoots,
+} from "./external-content.mjs"
 
 async function convertToText(elem) {
   if (messenger.messengerUtilities?.convertToPlainText === undefined) {
@@ -40,7 +43,10 @@ export class MdhrMangle {
       emojiDrop.remove()
     }
 
-    const externalRoots = findExternalContentRoots(this.doc)
+    const externalRoots = findExternalContentRoots(
+      this.doc,
+      EXTERNAL_CONTENT_SELECTOR + ", table",
+    )
     const excluded = [
       ...externalRoots,
       ...[...this.doc.querySelectorAll("img, div.mdhr-raw")].filter(
@@ -48,7 +54,10 @@ export class MdhrMangle {
       ),
     ]
     for (const e of excluded) {
-      const excludeContent = e.outerHTML
+      const excludeContent =
+        e.localName === "table"
+          ? `<div class="mdhr-html-table markdown-here-exclude">${e.outerHTML}</div>`
+          : e.outerHTML
       const placeholder = `${this.#placeholderPrefix}${this.#placeholderIndex++}`
       this.#excludedContent.set(placeholder, excludeContent)
       const placeholderElem = this.doc.createElement("span")
@@ -103,7 +112,7 @@ export class MdhrMangle {
 
   postprocess(result_html) {
     this.#excludedContent.forEach(function (value, key, map) {
-      result_html = result_html.replace(key, value)
+      result_html = result_html.replace(key, () => value)
     })
     this.#result_html = result_html
     return this.#result_html

@@ -6,7 +6,11 @@ var MdhrSendCompatibility = {
     }
     try {
       const filters = folder.getFilterList(null);
-      for (let index = 0; index < filters.filterCount; index++) {
+      const count = filters.filterCount;
+      if (!Number.isInteger(count) || count < 0) {
+        return false;
+      }
+      for (let index = 0; index < count; index++) {
         const filter = filters.getFilterAt(index);
         if (filter.enabled && (filter.filterType & postOutgoingType)) {
           return false;
@@ -50,7 +54,9 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
       const { MailUtils } = ChromeUtils.importESModule(
         "resource:///modules/MailUtils.sys.mjs"
       );
-      if (!prototype._mdhrFilterDiagnostics) {
+      if (!prototype._mdhrFilterDiagnostics &&
+          typeof prototype._filterSentMessage === "function" &&
+          typeof prototype.onStopOperation === "function") {
         const originalFilter = prototype._filterSentMessage;
         const originalStop = prototype.onStopOperation;
         const diagnosticFilter = function(...args) {
@@ -638,6 +644,27 @@ var ex_customui = class extends ExtensionCommon.ExtensionAPI {
     }});
     return {
       ex_customui: {
+        async editDraft(messageId) {
+          const header = context.extension.messageManager.get(messageId);
+          if (!header) {
+            throw new Error("Draft message is no longer available");
+          }
+          const folder = header.folder;
+          if (!folder?.isSpecialFolder(Ci.nsMsgFolderFlags.Drafts, true)) {
+            return false;
+          }
+          const uri = folder.getUriForMsg(header);
+          const type = Ci.nsIMsgCompType.Draft;
+          const format = Ci.nsIMsgCompFormat.Default;
+          const mailWindow = Services.wm.getMostRecentWindow("mail:3pane");
+          if (mailWindow?.ComposeMessage) {
+            await mailWindow.ComposeMessage(type, format, folder, [uri]);
+          } else {
+            const { MailServices } = ChromeUtils.importESModule("resource:///modules/MailServices.sys.mjs");
+            MailServices.compose.OpenComposeWindow(null, header, uri, type, format, null, null, null);
+          }
+          return true;
+        },
         async add(location, url, options) {
           if (!locationHandlers[location]) {
             throw new context.cloneScope.Error("Unsupported location: "

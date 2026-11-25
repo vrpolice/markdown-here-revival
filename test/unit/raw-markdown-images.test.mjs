@@ -5,6 +5,7 @@ import {
   RAW_IMAGE_ID_ATTRIBUTE,
   deduplicateRawMarkdownImages,
   restoreRawMarkdownImages,
+  restoreUnmarkedInlineImages,
 } from "../../extension/raw-markdown-images.mjs"
 
 class FakeImage {
@@ -24,6 +25,32 @@ class FakeImage {
     this.attributes.set(name, value)
   }
 }
+
+test("unmarked signature uses the sent MIME part without replacing remote images", async () => {
+  const local = new FakeImage({ src: "file:///old/logo.png", width: "72" })
+  const cid = new FakeImage({ src: "cid:avatar" })
+  const remote = new FakeImage({ src: "https://example.invalid/banner" })
+  const raw = createDocument([local, cid, remote])
+  const sent = createDocument([
+    new FakeImage({ src: "cid:logo", width: "72" }),
+    cid,
+    remote,
+  ])
+  const calls = []
+  const count = await restoreUnmarkedInlineImages(
+    raw,
+    async (src, options) => {
+      assert.equal(options.exact, true)
+      calls.push(src)
+      return "data:image/png;base64," + src.slice(4)
+    },
+    sent,
+  )
+  assert.equal(count, 2)
+  assert.deepEqual(calls, ["cid:logo", "cid:avatar"])
+  assert.equal(local.getAttribute("src"), "data:image/png;base64,logo")
+  assert.equal(remote.getAttribute("src"), "https://example.invalid/banner")
+})
 
 function createDocument(images) {
   return {

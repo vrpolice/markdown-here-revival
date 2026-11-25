@@ -33,6 +33,13 @@
     ],
     "functions": [
       {
+        "name": "editDraft",
+        "type": "function",
+        "async": true,
+        "description": "Open a saved draft in Thunderbird's draft editor. Returns false for messages outside a drafts folder.",
+        "parameters": [{ "name": "messageId", "type": "integer" }]
+      },
+      {
         "name": "add",
         "description": "Registers a HTML document to be displayed within as part of a native Thunderbird feature. Registering an already registered document will cause a reload of the document.",
         "type": "function",

@@ -69,3 +69,43 @@ export async function restoreRawMarkdownImages(
 
   return restored
 }
+
+// Older source snapshots and imported HTML signatures can contain MIME URLs
+// without a Markdown Here image marker. Match them to the message's own parts.
+export async function restoreUnmarkedInlineImages(
+  doc,
+  resolveSource,
+  sentDocument = doc,
+) {
+  let restored = 0
+  const images = [...doc.body.querySelectorAll("img")]
+  const sentImages = [...sentDocument.body.querySelectorAll("img")]
+  const isPart = (src) =>
+    /^(cid:|(?:imap|mailbox):.*[?&]part=)/i.test(src || "")
+  for (const [index, image] of images.entries()) {
+    const src = image.getAttribute("src")
+    if (!isPart(src) && !/^(?:file|https?):/i.test(src || "")) continue
+    let resolved = isPart(src) ? await resolveSource(src, { exact: true }) : src
+    // Thunderbird can replace a local signature URL with a new CID on send.
+    const sentImage = sentImages[index]
+    if (
+      resolved === src &&
+      doc !== sentDocument &&
+      images.length === sentImages.length &&
+      ["alt", "width", "height"].every(
+        (name) => image.getAttribute(name) === sentImage.getAttribute(name),
+      )
+    ) {
+      const sentSrc = sentImage.getAttribute("src")
+      if (sentSrc !== src && isPart(sentSrc)) {
+        const fromPart = await resolveSource(sentSrc, { exact: true })
+        if (fromPart !== sentSrc) resolved = fromPart
+      }
+    }
+    if (resolved && resolved !== src) {
+      image.setAttribute("src", resolved)
+      restored++
+    }
+  }
+  return restored
+}

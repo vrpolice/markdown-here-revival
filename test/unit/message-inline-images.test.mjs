@@ -30,6 +30,46 @@ const inlineAttachments = [
   },
 ]
 
+test("AliMail inline PNG labelled as generic binary gets a usable image URL", async () => {
+  const id = "__aliyun123"
+  const data = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB", "base64")
+  const resolver = createInlineImageResolver({
+    attachments: [
+      {
+        contentType: "application/octet-stream",
+        contentId: "<" + id + ">",
+        partName: "1.2",
+      },
+    ],
+    getAttachmentFile: async () =>
+      new Blob([data], { type: "application/octet-stream" }),
+    fileToDataURL: async (blob) =>
+      "data:" +
+      blob.type +
+      ";base64," +
+      Buffer.from(await blob.arrayBuffer()).toString("base64"),
+  })
+  assert.equal(
+    await resolver("cid:" + id, { exact: true }),
+    "data:image/png;base64," + data.toString("base64"),
+  )
+})
+
+test("unknown binary contents are not converted into inline images", async () => {
+  const resolver = createInlineImageResolver({
+    attachments: [
+      {
+        contentType: "application/octet-stream",
+        contentId: "binary",
+        partName: "1.2",
+      },
+    ],
+    getAttachmentFile: async () => new Blob(["not an image"]),
+    fileToDataURL: () => assert.fail("unexpected conversion"),
+  })
+  assert.equal(await resolver("cid:binary", { exact: true }), "cid:binary")
+})
+
 test("inline image resolver retrieves a CID attachment only once", async () => {
   const { requestedParts, resolver } = createResolver(inlineAttachments)
 
@@ -57,6 +97,15 @@ test("inline image resolver falls back to MIME image order", async () => {
   const source = await resolver(undefined, { position: 1 })
 
   assert.equal(source, "data:image/jpeg;base64,content-of-1.3")
+})
+
+test("exact signature lookups leave unmatched content IDs alone", async () => {
+  const { resolver, requestedParts } = createResolver(inlineAttachments)
+  assert.equal(
+    await resolver("cid:missing", { exact: true, position: 0 }),
+    "cid:missing",
+  )
+  assert.deepEqual(requestedParts, [])
 })
 
 test("inline image resolver keeps existing data URLs", async () => {

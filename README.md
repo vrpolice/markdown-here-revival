@@ -1,4 +1,4 @@
-# <img src="extension/images/md_fucsia.svg" alt="MDHR Logo" height="24" width="24" align="bottom"> Markdown Here Revival — Thunderbird 128–160 Edition
+# <img src="extension/images/md_fucsia.svg" alt="MDHR Logo" height="24" width="24" align="bottom"> Markdown Here Revival — Thunderbird 128–170 Edition
 
 > :cn: [中文版本 (Chinese)](README.zh-CN.md)
 
@@ -37,7 +37,7 @@ Versions 4.0.0 through 4.0.12 supported Thunderbird 128–150.
 
 Thunderbird 157 shipped on September 30, 2026. The upstream project's `strict_max_version` was capped at `150.*`, preventing installation on Thunderbird 151 and newer.
 
-This fork declares compatibility through **Thunderbird 160**. Thunderbird 157.0.1 has been checked locally; versions 158–160 remain subject to Thunderbird keeping the currently used Experiment API and compose-window internals stable.
+This fork declares compatibility through **Thunderbird 170**. The compose editor and send methods were checked against the Thunderbird 161.0 source. Later versions depend on Thunderbird retaining these internal interfaces.
 
 ---
 
@@ -45,7 +45,8 @@ This fork declares compatibility through **Thunderbird 160**. Thunderbird 157.0.
 
 | Extension version | Thunderbird version |
 |-------------------|---------------------|
-| 4.0.30+ | **128.0 – 160.\*** |
+| 4.0.33 | **128.0 – 170.\*** |
+| 4.0.30 – 4.0.32 | 128.0 – 160.* |
 | 4.0.29 | 128.0 – 156.* |
 | 4.0.27 – 4.0.28 | 128.0 – 155.* |
 | 4.0.25 – 4.0.26 | 128.0 – 154.* |

@@ -80,6 +80,15 @@ test("privileged initialization needs no external script loading and installs a 
   assert.deepEqual(errors, [])
   cleanup.forEach((handler) => handler.close())
   assert.equal(MessageSend.prototype._filterSentMessage, original)
+  for (const missing of ["_filterSentMessage", "onStopOperation"]) {
+    const saved = MessageSend.prototype[missing]
+    delete MessageSend.prototype[missing]
+    new sandbox.ex_customui().getAPI({
+      callOnClose: () => assert.fail("unexpected hook installation"),
+    })
+    assert.equal(MessageSend.prototype[missing], undefined)
+    MessageSend.prototype[missing] = saved
+  }
 })
 function input(rules = [], messageKey = 0, type = "imap") {
   return {
@@ -115,6 +124,8 @@ test("real outgoing rules, valid UIDs and local key zero retain normal filtering
 })
 test("unreadable filter lists are not silently treated as empty", () => {
   const value = input()
+  value.folder.getFilterList = () => ({})
+  assert.equal(canFinishWithoutFiltering(value), false)
   value.folder.getFilterList = () => {
     throw new Error("unavailable")
   }
